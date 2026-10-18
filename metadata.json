@@ -1,0 +1,6 @@
+{
+  "name": "UniTrack - Academic Week Calendar & Exam Countdowns",
+  "description": "Week-based university calendar with odd/even week tracking, vacations, exam countdowns with visual progress bars, class alerts, widgets, offline PWA, and JSON export/import.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
