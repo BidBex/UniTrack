@@ -1,12 +1,15 @@
 import { useEffect, useMemo, useState } from 'react';
 import {
+  AccentTheme,
   AppDataSchema,
   ClassEvent,
   ClassType,
   CountdownItem,
   DayOfWeek,
   NotificationSettings,
+  PostcardNote,
   SemesterConfig,
+  ThemeCustomization,
   VacationPeriod,
   WeekRecurrence,
 } from '../domain/types.ts';
@@ -15,8 +18,9 @@ import {
   filterClassesForDay,
   getAcademicWeekInfo,
   getNextUpcomingClass,
+  moveClassToDay,
 } from '../domain/calendarLogic.ts';
-import { INITIAL_APP_DATA } from '../data/initialData.ts';
+import { INITIAL_APP_DATA, INITIAL_POSTCARDS, INITIAL_THEME } from '../data/initialData.ts';
 
 const STORAGE_KEY = 'unitrack_app_data_v1';
 
@@ -60,6 +64,19 @@ export function useCalendarViewModel() {
     return INITIAL_APP_DATA.countdowns;
   });
 
+  const [postcards, setPostcards] = useState<PostcardNote[]>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved) as AppDataSchema;
+        if (Array.isArray(parsed.postcards)) return parsed.postcards;
+      }
+    } catch {
+      // ignore
+    }
+    return INITIAL_POSTCARDS;
+  });
+
   const [settings, setSettings] = useState<NotificationSettings>(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
@@ -72,6 +89,25 @@ export function useCalendarViewModel() {
     }
     return INITIAL_APP_DATA.settings;
   });
+
+  const [theme, setTheme] = useState<ThemeCustomization>(() => {
+    try {
+      const saved = localStorage.getItem(STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved) as AppDataSchema;
+        if (parsed.theme) return parsed.theme;
+      }
+    } catch {
+      // ignore
+    }
+    return INITIAL_THEME;
+  });
+
+  // Apply theme accent color dynamically to body / html
+  useEffect(() => {
+    const root = document.documentElement;
+    root.setAttribute('data-theme-accent', theme.accent);
+  }, [theme.accent]);
 
   // Current live date & time
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
@@ -182,14 +218,16 @@ export function useCalendarViewModel() {
       semester,
       classes,
       countdowns,
+      postcards,
       settings,
+      theme,
     };
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
     } catch {
       // storage full or disabled
     }
-  }, [semester, classes, countdowns, settings]);
+  }, [semester, classes, countdowns, postcards, settings, theme]);
 
   // Class CRUD actions
   const addClass = (newClass: Omit<ClassEvent, 'id'>) => {
@@ -203,6 +241,59 @@ export function useCalendarViewModel() {
 
   const deleteClass = (id: string) => {
     setClasses((prev) => prev.filter((c) => c.id !== id));
+  };
+
+  // Drag and Drop move class to another day or update times
+  const moveClass = (
+    classId: string,
+    targetDay: DayOfWeek,
+    newStartTime?: string,
+    newEndTime?: string
+  ) => {
+    setClasses((prev) =>
+      moveClassToDay(prev, classId, targetDay, newStartTime, newEndTime)
+    );
+  };
+
+  // Postcard Notes actions
+  const addPostcard = (note: Omit<PostcardNote, 'id' | 'createdAt'>) => {
+    const id = 'note-' + Date.now() + '-' + Math.random().toString(36).slice(2, 6);
+    setPostcards((prev) => [
+      {
+        ...note,
+        id,
+        createdAt: new Date().toISOString(),
+      },
+      ...prev,
+    ]);
+  };
+
+  const updatePostcard = (updated: PostcardNote) => {
+    setPostcards((prev) => prev.map((n) => (n.id === updated.id ? updated : n)));
+  };
+
+  const deletePostcard = (id: string) => {
+    setPostcards((prev) => prev.filter((n) => n.id !== id));
+  };
+
+  const togglePostcardPin = (id: string) => {
+    setPostcards((prev) =>
+      prev.map((n) => (n.id === id ? { ...n, isPinned: !n.isPinned } : n))
+    );
+  };
+
+  const toggleChecklistItem = (postcardId: string, itemId: string) => {
+    setPostcards((prev) =>
+      prev.map((n) => {
+        if (n.id !== postcardId || !n.checklist) return n;
+        return {
+          ...n,
+          checklist: n.checklist.map((item) =>
+            item.id === itemId ? { ...item, done: !item.done } : item
+          ),
+        };
+      })
+    );
   };
 
   // Vacation CRUD actions
@@ -234,7 +325,9 @@ export function useCalendarViewModel() {
       semester,
       classes,
       countdowns,
+      postcards,
       settings,
+      theme,
     };
     const jsonString = `data:text/json;charset=utf-8,${encodeURIComponent(
       JSON.stringify(exportData, null, 2)
@@ -263,13 +356,19 @@ export function useCalendarViewModel() {
       if (Array.isArray(parsed.countdowns)) {
         setCountdowns(parsed.countdowns);
       }
+      if (Array.isArray(parsed.postcards)) {
+        setPostcards(parsed.postcards);
+      }
       if (parsed.settings) {
         setSettings(parsed.settings);
+      }
+      if (parsed.theme) {
+        setTheme(parsed.theme);
       }
 
       return {
         success: true,
-        message: `Imported ${parsed.classes.length} classes and ${parsed.countdowns?.length || 0} countdowns successfully!`,
+        message: `Imported ${parsed.classes.length} classes, ${parsed.countdowns?.length || 0} countdowns, and ${parsed.postcards?.length || 0} notes!`,
       };
     } catch (err) {
       return {
@@ -283,7 +382,9 @@ export function useCalendarViewModel() {
     setSemester(INITIAL_APP_DATA.semester);
     setClasses(INITIAL_APP_DATA.classes);
     setCountdowns(INITIAL_APP_DATA.countdowns);
+    setPostcards(INITIAL_POSTCARDS);
     setSettings(INITIAL_APP_DATA.settings);
+    setTheme(INITIAL_THEME);
   };
 
   return {
@@ -291,8 +392,12 @@ export function useCalendarViewModel() {
     classes,
     countdowns,
     setCountdowns,
+    postcards,
+    setPostcards,
     settings,
     setSettings,
+    theme,
+    setTheme,
     currentDate,
     currentAcademicWeek,
     selectedWeek,
@@ -312,6 +417,12 @@ export function useCalendarViewModel() {
     addClass,
     updateClass,
     deleteClass,
+    moveClass,
+    addPostcard,
+    updatePostcard,
+    deletePostcard,
+    togglePostcardPin,
+    toggleChecklistItem,
     addVacation,
     deleteVacation,
     updateSemester,

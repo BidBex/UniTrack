@@ -12,7 +12,8 @@ import { TimetableGrid } from './components/TimetableGrid.tsx';
 import { AddEditClassModal } from './components/AddEditClassModal.tsx';
 import { CountdownsView } from './components/CountdownsView.tsx';
 import { WidgetView } from './components/WidgetView.tsx';
-import { SemesterSettingsModal } from './components/SemesterSettingsModal.tsx';
+import { PostcardsView } from './components/PostcardsView.tsx';
+import { SettingsTab } from './components/SettingsTab.tsx';
 import { DesktopHubModal } from './components/DesktopHubModal.tsx';
 import { NotificationToasts, OfflineBanner } from './components/NotificationToasts.tsx';
 import { ClassEvent, DayOfWeek } from './domain/types.ts';
@@ -24,8 +25,11 @@ export default function App() {
     classes,
     countdowns,
     setCountdowns,
+    postcards,
     settings,
     setSettings,
+    theme,
+    setTheme,
     currentDate,
     currentAcademicWeek,
     selectedWeek,
@@ -45,6 +49,12 @@ export default function App() {
     addClass,
     updateClass,
     deleteClass,
+    moveClass,
+    addPostcard,
+    updatePostcard,
+    deletePostcard,
+    togglePostcardPin,
+    toggleChecklistItem,
     addVacation,
     deleteVacation,
     updateSemester,
@@ -79,7 +89,7 @@ export default function App() {
 
   // Active Tab
   const [activeTab, setActiveTab] = useState<
-    'calendar' | 'countdowns' | 'widget' | 'desktop' | 'settings'
+    'calendar' | 'countdowns' | 'widget' | 'notes' | 'desktop' | 'settings'
   >('calendar');
 
   // Modals
@@ -101,7 +111,11 @@ export default function App() {
   useEffect(() => {
     if (!settings.enabled) return;
 
-    if (nextUpcoming && nextUpcoming.startsInMinutes <= settings.classAlertMinutes && nextUpcoming.startsInMinutes > 0) {
+    if (
+      nextUpcoming &&
+      nextUpcoming.startsInMinutes <= settings.classAlertMinutes &&
+      nextUpcoming.startsInMinutes > 0
+    ) {
       const alertKey = `alert_${nextUpcoming.classEvent.id}_${new Date().toDateString()}`;
       const lastSent = sessionStorage.getItem(alertKey);
       if (!lastSent) {
@@ -184,6 +198,7 @@ export default function App() {
               onEditClass={handleEditClass}
               onDeleteClass={deleteClass}
               onAddClassForDay={handleOpenAddClass}
+              onMoveClass={moveClass}
             />
           </div>
         )}
@@ -205,16 +220,37 @@ export default function App() {
           />
         )}
 
+        {activeTab === 'notes' && (
+          <PostcardsView
+            postcards={postcards}
+            onAddPostcard={addPostcard}
+            onUpdatePostcard={updatePostcard}
+            onDeletePostcard={deletePostcard}
+            onTogglePin={togglePostcardPin}
+            onToggleChecklist={toggleChecklistItem}
+          />
+        )}
+
         {activeTab === 'desktop' && (
           <DesktopHubModal onExportJson={exportToJson} />
         )}
 
         {activeTab === 'settings' && (
-          <SemesterSettingsModal
+          <SettingsTab
+            theme={theme}
+            onUpdateTheme={setTheme}
+            isDarkMode={isDarkMode}
+            setIsDarkMode={setIsDarkMode}
+            settings={settings}
+            onUpdateSettings={setSettings}
+            onRequestNotificationPermission={requestNotificationPermission}
+            onTestNotification={testNotification}
             semester={semester}
             onUpdateSemester={updateSemester}
             onAddVacation={addVacation}
             onDeleteVacation={deleteVacation}
+            onExportJson={exportToJson}
+            onImportJson={importFromJson}
             onResetToSampleData={resetToSampleData}
           />
         )}

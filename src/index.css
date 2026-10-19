@@ -1,3 +1,236 @@
 @import "tailwindcss";
 
 @custom-variant dark (&:where(.dark, .dark *));
+
+:root {
+  /* Default: Academic Indigo */
+  --theme-primary: #4f46e5;
+  --theme-primary-hover: #4338ca;
+  --theme-light: #eef2ff;
+  --theme-light-border: #c7d2fe;
+  --theme-text-light: #3730a3;
+  --theme-dark-bg: rgba(49, 46, 129, 0.4);
+  --theme-dark-border: rgba(99, 102, 241, 0.3);
+  --theme-dark-text: #a5b4fc;
+  --theme-glow: rgba(79, 70, 229, 0.25);
+  --theme-gradient: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+  --theme-ambient-top: radial-gradient(circle at 50% 0%, rgba(99, 102, 241, 0.16) 0%, transparent 68%);
+  --theme-ambient-bottom: radial-gradient(circle at 85% 95%, rgba(124, 58, 237, 0.12) 0%, transparent 60%);
+  --theme-ambient-dark-top: radial-gradient(circle at 50% 0%, rgba(79, 70, 229, 0.22) 0%, transparent 68%);
+  --theme-ambient-dark-bottom: radial-gradient(circle at 85% 95%, rgba(124, 58, 237, 0.15) 0%, transparent 60%);
+  --theme-body-bg-light: #f8fafc;
+  --theme-body-bg-dark: #090d16;
+}
+
+[data-theme-accent="blue"] {
+  --theme-primary: #2563eb;
+  --theme-primary-hover: #1d4ed8;
+  --theme-light: #eff6ff;
+  --theme-light-border: #bfdbfe;
+  --theme-text-light: #1e40af;
+  --theme-dark-bg: rgba(30, 58, 138, 0.4);
+  --theme-dark-border: rgba(59, 130, 246, 0.3);
+  --theme-dark-text: #93c5fd;
+  --theme-glow: rgba(37, 99, 235, 0.25);
+  --theme-gradient: linear-gradient(135deg, #2563eb 0%, #0284c7 100%);
+  --theme-ambient-top: radial-gradient(circle at 50% 0%, rgba(37, 99, 235, 0.16) 0%, transparent 68%);
+  --theme-ambient-bottom: radial-gradient(circle at 85% 95%, rgba(2, 132, 199, 0.12) 0%, transparent 60%);
+  --theme-ambient-dark-top: radial-gradient(circle at 50% 0%, rgba(37, 99, 235, 0.22) 0%, transparent 68%);
+  --theme-ambient-dark-bottom: radial-gradient(circle at 85% 95%, rgba(2, 132, 199, 0.15) 0%, transparent 60%);
+  --theme-body-bg-light: #f8fbff;
+  --theme-body-bg-dark: #080f1e;
+}
+
+[data-theme-accent="emerald"] {
+  --theme-primary: #059669;
+  --theme-primary-hover: #047857;
+  --theme-light: #ecfdf5;
+  --theme-light-border: #a7f3d0;
+  --theme-text-light: #065f46;
+  --theme-dark-bg: rgba(6, 78, 59, 0.4);
+  --theme-dark-border: rgba(16, 185, 129, 0.3);
+  --theme-dark-text: #6ee7b7;
+  --theme-glow: rgba(5, 150, 105, 0.25);
+  --theme-gradient: linear-gradient(135deg, #059669 0%, #0d9488 100%);
+  --theme-ambient-top: radial-gradient(circle at 50% 0%, rgba(5, 150, 105, 0.16) 0%, transparent 68%);
+  --theme-ambient-bottom: radial-gradient(circle at 85% 95%, rgba(13, 148, 136, 0.12) 0%, transparent 60%);
+  --theme-ambient-dark-top: radial-gradient(circle at 50% 0%, rgba(5, 150, 105, 0.22) 0%, transparent 68%);
+  --theme-ambient-dark-bottom: radial-gradient(circle at 85% 95%, rgba(13, 148, 136, 0.15) 0%, transparent 60%);
+  --theme-body-bg-light: #f7fdf9;
+  --theme-body-bg-dark: #061510;
+}
+
+[data-theme-accent="purple"] {
+  --theme-primary: #7c3aed;
+  --theme-primary-hover: #6d28d9;
+  --theme-light: #f5f3ff;
+  --theme-light-border: #ddd6fe;
+  --theme-text-light: #5b21b6;
+  --theme-dark-bg: rgba(91, 33, 182, 0.4);
+  --theme-dark-border: rgba(139, 92, 246, 0.3);
+  --theme-dark-text: #c4b5fd;
+  --theme-glow: rgba(124, 58, 237, 0.25);
+  --theme-gradient: linear-gradient(135deg, #7c3aed 0%, #9333ea 100%);
+  --theme-ambient-top: radial-gradient(circle at 50% 0%, rgba(124, 58, 237, 0.16) 0%, transparent 68%);
+  --theme-ambient-bottom: radial-gradient(circle at 85% 95%, rgba(147, 51, 234, 0.12) 0%, transparent 60%);
+  --theme-ambient-dark-top: radial-gradient(circle at 50% 0%, rgba(124, 58, 237, 0.22) 0%, transparent 68%);
+  --theme-ambient-dark-bottom: radial-gradient(circle at 85% 95%, rgba(147, 51, 234, 0.15) 0%, transparent 60%);
+  --theme-body-bg-light: #faf8ff;
+  --theme-body-bg-dark: #100b1a;
+}
+
+[data-theme-accent="rose"] {
+  --theme-primary: #e11d48;
+  --theme-primary-hover: #be123c;
+  --theme-light: #fff1f2;
+  --theme-light-border: #fecdd3;
+  --theme-text-light: #9f1239;
+  --theme-dark-bg: rgba(159, 18, 57, 0.4);
+  --theme-dark-border: rgba(244, 63, 94, 0.3);
+  --theme-dark-text: #fda4af;
+  --theme-glow: rgba(225, 29, 72, 0.25);
+  --theme-gradient: linear-gradient(135deg, #e11d48 0%, #db2777 100%);
+  --theme-ambient-top: radial-gradient(circle at 50% 0%, rgba(225, 29, 72, 0.16) 0%, transparent 68%);
+  --theme-ambient-bottom: radial-gradient(circle at 85% 95%, rgba(219, 39, 119, 0.12) 0%, transparent 60%);
+  --theme-ambient-dark-top: radial-gradient(circle at 50% 0%, rgba(225, 29, 72, 0.22) 0%, transparent 68%);
+  --theme-ambient-dark-bottom: radial-gradient(circle at 85% 95%, rgba(219, 39, 119, 0.15) 0%, transparent 60%);
+  --theme-body-bg-light: #fff8f9;
+  --theme-body-bg-dark: #16080d;
+}
+
+[data-theme-accent="amber"] {
+  --theme-primary: #d97706;
+  --theme-primary-hover: #b45309;
+  --theme-light: #fffbeb;
+  --theme-light-border: #fde68a;
+  --theme-text-light: #92400e;
+  --theme-dark-bg: rgba(146, 64, 14, 0.4);
+  --theme-dark-border: rgba(245, 158, 11, 0.3);
+  --theme-dark-text: #fcd34d;
+  --theme-glow: rgba(217, 119, 6, 0.25);
+  --theme-gradient: linear-gradient(135deg, #d97706 0%, #ea580c 100%);
+  --theme-ambient-top: radial-gradient(circle at 50% 0%, rgba(217, 119, 6, 0.16) 0%, transparent 68%);
+  --theme-ambient-bottom: radial-gradient(circle at 85% 95%, rgba(234, 88, 12, 0.12) 0%, transparent 60%);
+  --theme-ambient-dark-top: radial-gradient(circle at 50% 0%, rgba(217, 119, 6, 0.22) 0%, transparent 68%);
+  --theme-ambient-dark-bottom: radial-gradient(circle at 85% 95%, rgba(234, 88, 12, 0.15) 0%, transparent 60%);
+  --theme-body-bg-light: #fffdf7;
+  --theme-body-bg-dark: #140d04;
+}
+
+[data-theme-accent="cyan"] {
+  --theme-primary: #0891b2;
+  --theme-primary-hover: #0e7490;
+  --theme-light: #ecfeff;
+  --theme-light-border: #a5f3fc;
+  --theme-text-light: #155e75;
+  --theme-dark-bg: rgba(21, 94, 117, 0.4);
+  --theme-dark-border: rgba(6, 182, 212, 0.3);
+  --theme-dark-text: #67e8f9;
+  --theme-glow: rgba(8, 145, 178, 0.25);
+  --theme-gradient: linear-gradient(135deg, #0891b2 0%, #0284c7 100%);
+  --theme-ambient-top: radial-gradient(circle at 50% 0%, rgba(8, 145, 178, 0.16) 0%, transparent 68%);
+  --theme-ambient-bottom: radial-gradient(circle at 85% 95%, rgba(2, 132, 199, 0.12) 0%, transparent 60%);
+  --theme-ambient-dark-top: radial-gradient(circle at 50% 0%, rgba(8, 145, 178, 0.22) 0%, transparent 68%);
+  --theme-ambient-dark-bottom: radial-gradient(circle at 85% 95%, rgba(2, 132, 199, 0.15) 0%, transparent 60%);
+  --theme-body-bg-light: #f7feff;
+  --theme-body-bg-dark: #051318;
+}
+
+/* App Background & Ambient Atmospheric Lighting */
+body {
+  background-color: var(--theme-body-bg-light);
+  transition: background-color 0.4s ease;
+}
+
+.dark body {
+  background-color: var(--theme-body-bg-dark);
+}
+
+.app-ambient-glow {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 540px;
+  pointer-events: none;
+  z-index: 0;
+  background: var(--theme-ambient-top);
+  transition: background 0.4s ease;
+}
+
+.dark .app-ambient-glow {
+  background: var(--theme-ambient-dark-top);
+}
+
+.app-ambient-bottom-glow {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 480px;
+  pointer-events: none;
+  z-index: 0;
+  background: var(--theme-ambient-bottom);
+  transition: background 0.4s ease;
+}
+
+.dark .app-ambient-bottom-glow {
+  background: var(--theme-ambient-dark-bottom);
+}
+
+/* Theme Helper Utility Classes */
+.btn-theme-primary {
+  background: var(--theme-gradient);
+  color: #ffffff;
+  box-shadow: 0 4px 14px 0 var(--theme-glow);
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.btn-theme-primary:hover {
+  filter: brightness(1.08);
+  transform: translateY(-1px);
+}
+
+.btn-theme-primary:active {
+  transform: translateY(0);
+}
+
+.badge-theme-soft {
+  background-color: var(--theme-light);
+  color: var(--theme-text-light);
+  border: 1px solid var(--theme-light-border);
+}
+
+.dark .badge-theme-soft {
+  background-color: var(--theme-dark-bg);
+  color: var(--theme-dark-text);
+  border: 1px solid var(--theme-dark-border);
+}
+
+.text-theme {
+  color: var(--theme-primary);
+}
+
+.dark .text-theme {
+  color: var(--theme-dark-text);
+}
+
+.bg-theme {
+  background-color: var(--theme-primary);
+}
+
+.border-theme-accent {
+  border-color: var(--theme-primary);
+}
+
+.border-theme-soft {
+  border-color: var(--theme-light-border);
+}
+
+.dark .border-theme-soft {
+  border-color: var(--theme-dark-border);
+}
+
+.ring-theme {
+  --tw-ring-color: var(--theme-primary);
+}

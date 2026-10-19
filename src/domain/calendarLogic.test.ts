@@ -6,6 +6,7 @@ import {
   filterClassesForDay,
   countVacationPausedDays,
   getNextUpcomingClass,
+  moveClassToDay,
 } from './calendarLogic.ts';
 import { calculateCountdownProgress } from './countdownLogic.ts';
 import type { ClassEvent, CountdownItem, SemesterConfig } from './types.ts';
@@ -144,3 +145,25 @@ test('Countdown progress bar and status calculation', () => {
   assert.equal(overdueProgress.isOverdue, true);
   assert.equal(overdueProgress.urgency, 'critical');
 });
+
+test('moveClassToDay correctly updates target day of week', () => {
+  const originalClasses: ClassEvent[] = [
+    {
+      id: 'c-test',
+      title: 'Robotics',
+      code: 'ROB101',
+      type: 'lecture',
+      day: 'Monday',
+      startTime: '10:00',
+      endTime: '12:00',
+      room: 'Room 101',
+      recurrence: 'all',
+      color: '#4f46e5',
+    },
+  ];
+
+  const moved = moveClassToDay(originalClasses, 'c-test', 'Thursday');
+  assert.equal(moved[0].day, 'Thursday');
+  assert.equal(moved[0].startTime, '10:00');
+});
+

@@ -15,14 +15,15 @@ import {
   Palmtree,
   CheckCircle2,
   AlertCircle,
+  StickyNote,
 } from 'lucide-react';
 import { AcademicWeekInfo, NotificationSettings } from '../domain/types.ts';
 import { usePWAInstall } from '../viewmodels/usePWAInstall.ts';
 
 interface NavbarProps {
   currentWeekInfo: AcademicWeekInfo;
-  activeTab: 'calendar' | 'countdowns' | 'widget' | 'desktop' | 'settings';
-  setActiveTab: (tab: 'calendar' | 'countdowns' | 'widget' | 'desktop' | 'settings') => void;
+  activeTab: 'calendar' | 'countdowns' | 'widget' | 'notes' | 'desktop' | 'settings';
+  setActiveTab: (tab: 'calendar' | 'countdowns' | 'widget' | 'notes' | 'desktop' | 'settings') => void;
   isDarkMode: boolean;
   setIsDarkMode: (val: boolean) => void;
   onExportJson: () => void;
@@ -147,6 +148,18 @@ export const Navbar: React.FC<NavbarProps> = ({
           </button>
 
           <button
+            onClick={() => setActiveTab('notes')}
+            className={`flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs font-medium transition ${
+              activeTab === 'notes'
+                ? 'bg-white text-indigo-600 shadow-sm dark:bg-slate-700 dark:text-white'
+                : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
+            }`}
+          >
+            <StickyNote className="h-3.5 w-3.5" />
+            Postcards
+          </button>
+
+          <button
             onClick={() => setActiveTab('desktop')}
             className={`flex items-center gap-2 rounded-lg px-3 py-1.5 text-xs font-medium transition ${
               activeTab === 'desktop'
@@ -167,7 +180,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             }`}
           >
             <Settings className="h-3.5 w-3.5" />
-            Semester
+            Settings
           </button>
         </nav>
 
@@ -309,6 +322,17 @@ export const Navbar: React.FC<NavbarProps> = ({
             Widget
           </button>
           <button
+            onClick={() => setActiveTab('notes')}
+            className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-medium ${
+              activeTab === 'notes'
+                ? 'bg-indigo-600 text-white'
+                : 'text-slate-600 dark:text-slate-400'
+            }`}
+          >
+            <StickyNote className="h-3 w-3" />
+            Notes
+          </button>
+          <button
             onClick={() => setActiveTab('desktop')}
             className={`flex items-center gap-1.5 rounded-lg px-2.5 py-1 text-xs font-medium ${
               activeTab === 'desktop'
@@ -328,7 +352,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             }`}
           >
             <Settings className="h-3 w-3" />
-            Semester
+            Settings
           </button>
         </div>
       </div>

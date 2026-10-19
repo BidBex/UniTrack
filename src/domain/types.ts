@@ -109,6 +109,46 @@ export interface CountdownProgress {
   urgency: 'critical' | 'warning' | 'normal' | 'done';
 }
 
+export interface ChecklistItem {
+  id: string;
+  text: string;
+  done: boolean;
+}
+
+export type PostcardColor =
+  | 'yellow'
+  | 'pink'
+  | 'green'
+  | 'blue'
+  | 'purple'
+  | 'orange';
+
+export interface PostcardNote {
+  id: string;
+  title: string;
+  content: string;
+  color: PostcardColor;
+  isPinned: boolean;
+  tag?: string;
+  checklist?: ChecklistItem[];
+  createdAt: string;
+}
+
+export type AccentTheme =
+  | 'indigo'
+  | 'emerald'
+  | 'blue'
+  | 'amber'
+  | 'rose'
+  | 'purple'
+  | 'cyan';
+
+export interface ThemeCustomization {
+  accent: AccentTheme;
+  density: 'comfortable' | 'compact';
+  cardStyle: 'rounded' | 'flat';
+}
+
 export interface AppDataSchema {
   version: string;
   appName: string;
@@ -116,5 +156,8 @@ export interface AppDataSchema {
   semester: SemesterConfig;
   classes: ClassEvent[];
   countdowns: CountdownItem[];
+  postcards?: PostcardNote[];
   settings: NotificationSettings;
+  theme?: ThemeCustomization;
 }
+

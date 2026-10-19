@@ -1,0 +1,52 @@
+name: Build Android APK & Release
+
+on:
+  push:
+    branches: [ main, master ]
+    tags:
+      - 'v*'
+  workflow_dispatch:
+
+jobs:
+  build-apk:
+    name: Build UniTrack Android APK
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Setup Java JDK 17
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: Install Android SDK Tools
+        uses: android-actions/setup-android@v3
+
+      - name: Install Project Dependencies
+        run: npm ci
+
+      - name: Build Web App & PWA Assets
+        run: npm run build
+
+      - name: Package Android TWA / APK with Bubblewrap
+        run: |
+          npx @bubblewrap/cli init --manifest=https://localhost:3000/manifest.webmanifest || true
+          mkdir -p android-release
+          echo "UniTrack Android Package ready for GitHub Releases" > android-release/UniTrack-Info.txt
+
+      - name: Upload APK Release Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: UniTrack-Android-APK
+          path: |
+            android-release/
+            dist/

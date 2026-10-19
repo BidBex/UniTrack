@@ -298,3 +298,25 @@ export function getNextUpcomingClass(
 
   return null;
 }
+
+/**
+ * Moves a class to another day and optionally updates its time
+ */
+export function moveClassToDay(
+  classes: ClassEvent[],
+  classId: string,
+  targetDay: DayOfWeek,
+  newStartTime?: string,
+  newEndTime?: string
+): ClassEvent[] {
+  return classes.map((c) => {
+    if (c.id !== classId) return c;
+    return {
+      ...c,
+      day: targetDay,
+      startTime: newStartTime || c.startTime,
+      endTime: newEndTime || c.endTime,
+    };
+  });
+}
+

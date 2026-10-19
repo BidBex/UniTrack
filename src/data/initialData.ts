@@ -1,4 +1,11 @@
-import { AppDataSchema, ClassEvent, CountdownItem, SemesterConfig } from '../domain/types.ts';
+import {
+  AppDataSchema,
+  ClassEvent,
+  CountdownItem,
+  PostcardNote,
+  SemesterConfig,
+  ThemeCustomization,
+} from '../domain/types.ts';
 
 export const INITIAL_SEMESTER: SemesterConfig = {
   name: 'Autumn Semester 2026/2027',
@@ -240,6 +247,62 @@ export const INITIAL_COUNTDOWNS: CountdownItem[] = [
   },
 ];
 
+export const INITIAL_POSTCARDS: PostcardNote[] = [
+  {
+    id: 'note-1',
+    title: 'Prof. Vancea Office Hours',
+    content: 'Wednesdays 14:00 - 16:00 in Complex B, Room 210.\nDiscuss OS scheduling algorithm term paper and kernel modules.',
+    color: 'yellow',
+    isPinned: true,
+    tag: 'Advising',
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: 'note-2',
+    title: 'Algorithms Discord Study Group',
+    content: 'Weekly voice chat every Sunday at 18:00.\nSolving LeetCode hard problems and dynamic programming recurrence relations.',
+    color: 'green',
+    isPinned: true,
+    tag: 'Study Group',
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: 'note-3',
+    title: 'Central Library Books to Return',
+    content: 'Check due dates before semester reading week begins.',
+    color: 'purple',
+    isPinned: false,
+    tag: 'Library',
+    checklist: [
+      { id: 'chk-1', text: 'Tanenbaum - Modern Operating Systems (4th ed)', done: true },
+      { id: 'chk-2', text: 'Cormen - Introduction to Algorithms (CLRS)', done: false },
+      { id: 'chk-3', text: 'Gilbert Strang - Linear Algebra and Learning from Data', done: false },
+    ],
+    createdAt: new Date().toISOString(),
+  },
+  {
+    id: 'note-4',
+    title: 'Midterm Exam Survival Checklist',
+    content: 'Items strictly required to be placed on desk before exam starts.',
+    color: 'pink',
+    isPinned: false,
+    tag: 'Exams',
+    checklist: [
+      { id: 'chk-4', text: 'University Student ID Card & Badge', done: true },
+      { id: 'chk-5', text: 'Two blue ballpoint pens & pencil', done: true },
+      { id: 'chk-6', text: 'Non-programmable scientific calculator', done: true },
+      { id: 'chk-7', text: 'One double-sided handwritten A4 formula sheet', done: false },
+    ],
+    createdAt: new Date().toISOString(),
+  },
+];
+
+export const INITIAL_THEME: ThemeCustomization = {
+  accent: 'indigo',
+  density: 'comfortable',
+  cardStyle: 'rounded',
+};
+
 export const INITIAL_APP_DATA: AppDataSchema = {
   version: '1.0.0',
   appName: 'UniTrack University Calendar',
@@ -247,10 +310,13 @@ export const INITIAL_APP_DATA: AppDataSchema = {
   semester: INITIAL_SEMESTER,
   classes: INITIAL_CLASSES,
   countdowns: INITIAL_COUNTDOWNS,
+  postcards: INITIAL_POSTCARDS,
   settings: {
     enabled: true,
     classAlertMinutes: 15,
     deadlineAlertDays: [3, 1],
     soundEnabled: true,
   },
+  theme: INITIAL_THEME,
 };
+
