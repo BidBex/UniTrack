@@ -175,6 +175,25 @@ npm run build
 ```
 The compiled, production-ready static assets and service workers will be output to the `dist/` directory.
 
+### 🔧 Troubleshooting GitHub Actions: "Dependencies lock file is not found"
+
+If your GitHub Actions runner reports:
+`Error: Dependencies lock file is not found in /home/runner/work/UniTrack/UniTrack. Supported file patterns: package-lock.json,npm-shrinkwrap.json,yarn.lock`
+
+This happens when `package-lock.json` was omitted during `git push` or when `actions/setup-node` is configured with `cache: 'npm'` in a custom workflow on GitHub.
+
+**Quick Fix:**
+1. Ensure `package-lock.json` is committed to git:
+   ```bash
+   git add package-lock.json
+   git commit -m "chore: add package-lock.json for GitHub Actions CI"
+   git push
+   ```
+2. In your workflow files (`.github/workflows/*.yml`), ensure `actions/setup-node` does not specify `cache: 'npm'` without the lockfile, or use the pre-configured `.github/workflows/ci.yml` and `.github/workflows/build-android-apk.yml` included in this repository which automatically handle dependencies via:
+   ```bash
+   if [ -f package-lock.json ]; then npm ci || npm install; else npm install; fi
+   ```
+
 ---
 
 ## 💾 JSON Data Backup & Export Schema

@@ -1,0 +1,39 @@
+name: Continuous Integration & Verification
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+  workflow_dispatch:
+
+jobs:
+  build-and-test:
+    name: Build & Test Web App
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - name: Install Dependencies
+        run: |
+          if [ -f package-lock.json ]; then
+            npm ci || npm install
+          else
+            npm install
+          fi
+
+      - name: Run Domain Logic Unit Tests
+        run: npm test
+
+      - name: Type Check & Lint
+        run: npm run lint
+
+      - name: Build Web Application & PWA
+        run: npm run build
