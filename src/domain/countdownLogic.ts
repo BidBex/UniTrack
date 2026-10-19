@@ -29,7 +29,10 @@ export function calculateCountdownProgress(
   }
 
   const now = currentDate.getTime();
-  const due = new Date(item.dueDate).getTime();
+  let due = new Date(item.dueDate).getTime();
+  if (isNaN(due)) {
+    due = now + 7 * 24 * 60 * 60 * 1000;
+  }
 
   // If no start date specified or invalid, assume 14 days prior to due date for visual progress
   let start = item.startDate ? new Date(item.startDate).getTime() : 0;

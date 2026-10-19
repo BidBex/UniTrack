@@ -55,7 +55,9 @@ export const AndroidDownloadModal: React.FC<AndroidDownloadModalProps> = ({
   if (!isOpen) return null;
 
   const handleCopyLink = (text: string) => {
-    navigator.clipboard.writeText(text);
+    if (navigator?.clipboard?.writeText) {
+      navigator.clipboard.writeText(text).catch(() => {});
+    }
     setCopiedLink(true);
     setTimeout(() => setCopiedLink(false), 2500);
   };

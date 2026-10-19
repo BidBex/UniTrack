@@ -26,6 +26,10 @@ export const DAYS_OF_WEEK: DayOfWeek[] = [
  */
 export function normalizeDate(date: Date | string): Date {
   const d = typeof date === 'string' ? new Date(date) : new Date(date);
+  if (isNaN(d.getTime())) {
+    const today = new Date();
+    return new Date(today.getFullYear(), today.getMonth(), today.getDate(), 0, 0, 0, 0);
+  }
   return new Date(d.getFullYear(), d.getMonth(), d.getDate(), 0, 0, 0, 0);
 }
 
