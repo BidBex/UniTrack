@@ -7,6 +7,7 @@ import {
   countVacationPausedDays,
   getNextUpcomingClass,
   moveClassToDay,
+  calculateSemesterTimeline,
 } from './calendarLogic.ts';
 import { calculateCountdownProgress } from './countdownLogic.ts';
 import type { ClassEvent, CountdownItem, SemesterConfig } from './types.ts';
@@ -165,5 +166,43 @@ test('moveClassToDay correctly updates target day of week', () => {
   const moved = moveClassToDay(originalClasses, 'c-test', 'Thursday');
   assert.equal(moved[0].day, 'Thursday');
   assert.equal(moved[0].startTime, '10:00');
+});
+
+test('calculateSemesterTimeline computes progress percentage and dates accurately', () => {
+  const config: SemesterConfig = {
+    name: 'Autumn 2026',
+    startDate: '2026-10-05',
+    totalWeeks: 14,
+    initialWeekParity: 'odd',
+    vacations: [
+      {
+        id: 'vac-1',
+        name: 'Winter Break',
+        startDate: '2026-12-21',
+        endDate: '2026-12-27',
+        pauseWeekNumbering: true, // 7 days paused
+      },
+    ],
+  };
+
+  // Test start date: Day 1 of semester
+  const startDay = new Date('2026-10-05T00:00:00');
+  const startTimeline = calculateSemesterTimeline(config, startDay);
+  assert.equal(startTimeline.isPreSemester, false);
+  assert.equal(startTimeline.daysPassed, 1);
+  assert.ok(startTimeline.progressPercent > 0);
+  assert.equal(startTimeline.totalDays, 14 * 7 + 7); // 98 + 7 = 105 days
+
+  // Test pre-semester date
+  const preDay = new Date('2026-10-01T00:00:00');
+  const preTimeline = calculateSemesterTimeline(config, preDay);
+  assert.equal(preTimeline.isPreSemester, true);
+  assert.equal(preTimeline.progressPercent, 0);
+  assert.equal(preTimeline.daysUntilStart, 4);
+
+  // Test vacation markers are mapped
+  assert.equal(startTimeline.vacationMarkers.length, 1);
+  assert.equal(startTimeline.vacationMarkers[0].name, 'Winter Break');
+  assert.ok(startTimeline.vacationMarkers[0].startPercent > 0);
 });
 

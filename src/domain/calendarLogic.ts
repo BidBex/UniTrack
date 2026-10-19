@@ -320,3 +320,134 @@ export function moveClassToDay(
   });
 }
 
+export interface VacationMarker {
+  id: string;
+  name: string;
+  startPercent: number;
+  endPercent: number;
+  startDateFormatted: string;
+  endDateFormatted: string;
+}
+
+export interface SemesterTimeline {
+  startDate: Date;
+  endDate: Date;
+  startDateFormatted: string;
+  endDateFormatted: string;
+  totalDays: number;
+  daysPassed: number;
+  daysRemaining: number;
+  daysUntilStart: number;
+  progressPercent: number;
+  isPreSemester: boolean;
+  isPostSemester: boolean;
+  isOngoing: boolean;
+  vacationMarkers: VacationMarker[];
+}
+
+/**
+ * Calculates semester timeline metrics and visual progress bar percentage
+ * based on semester start date, total weeks, vacations, and current date.
+ */
+export function calculateSemesterTimeline(
+  semester: SemesterConfig,
+  currentDate: Date = new Date()
+): SemesterTimeline {
+  const oneDayMs = 24 * 60 * 60 * 1000;
+  const normStart = normalizeDate(semester.startDate);
+  const normCurrent = normalizeDate(currentDate);
+  const totalWeeks = Math.max(1, semester.totalWeeks || 14);
+
+  // Determine end date:
+  let additionalPausedDays = 0;
+  const vacations = semester.vacations || [];
+  for (const v of vacations) {
+    if (!v.pauseWeekNumbering) continue;
+    const vStart = normalizeDate(v.startDate).getTime();
+    const vEnd = normalizeDate(v.endDate).getTime();
+    if (vEnd >= vStart && vStart >= normStart.getTime()) {
+      const days = Math.round((vEnd - vStart) / oneDayMs) + 1;
+      additionalPausedDays += days;
+    }
+  }
+
+  const totalSemesterDays = totalWeeks * 7 + additionalPausedDays;
+  const normEnd = new Date(normStart.getTime() + (totalSemesterDays - 1) * oneDayMs);
+
+  const diffMs = normCurrent.getTime() - normStart.getTime();
+  const daysFromStart = Math.floor(diffMs / oneDayMs);
+
+  const isPreSemester = daysFromStart < 0;
+  const isPostSemester = normCurrent.getTime() > normEnd.getTime();
+  const isOngoing = !isPreSemester && !isPostSemester;
+
+  const daysPassed = isPreSemester
+    ? 0
+    : isPostSemester
+    ? totalSemesterDays
+    : Math.min(totalSemesterDays, daysFromStart + 1);
+
+  const daysRemaining = isPostSemester
+    ? 0
+    : isPreSemester
+    ? totalSemesterDays
+    : Math.max(0, Math.round((normEnd.getTime() - normCurrent.getTime()) / oneDayMs));
+
+  const daysUntilStart = isPreSemester ? Math.abs(daysFromStart) : 0;
+
+  const progressPercent = isPreSemester
+    ? 0
+    : isPostSemester
+    ? 100
+    : Math.min(
+        100,
+        Math.max(0, Math.round((daysPassed / totalSemesterDays) * 1000) / 10)
+      );
+
+  const formatDate = (d: Date) =>
+    d.toLocaleDateString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      year: 'numeric',
+    });
+
+  const vacationMarkers: VacationMarker[] = [];
+  const durationMs = normEnd.getTime() - normStart.getTime();
+  for (const v of vacations) {
+    const vStart = normalizeDate(v.startDate).getTime();
+    const vEnd = normalizeDate(v.endDate).getTime();
+    if (vEnd >= normStart.getTime() && vStart <= normEnd.getTime()) {
+      const startOffset = Math.max(0, vStart - normStart.getTime());
+      const endOffset = Math.min(durationMs, vEnd - normStart.getTime());
+      const startPercent = durationMs > 0 ? Math.min(100, Math.max(0, (startOffset / durationMs) * 100)) : 0;
+      const endPercent = durationMs > 0 ? Math.min(100, Math.max(0, (endOffset / durationMs) * 100)) : 0;
+
+      vacationMarkers.push({
+        id: v.id,
+        name: v.name,
+        startPercent: Math.round(startPercent * 10) / 10,
+        endPercent: Math.max(startPercent + 1.5, Math.round(endPercent * 10) / 10),
+        startDateFormatted: formatDate(new Date(vStart)),
+        endDateFormatted: formatDate(new Date(vEnd)),
+      });
+    }
+  }
+
+  return {
+    startDate: normStart,
+    endDate: normEnd,
+    startDateFormatted: formatDate(normStart),
+    endDateFormatted: formatDate(normEnd),
+    totalDays: totalSemesterDays,
+    daysPassed,
+    daysRemaining,
+    daysUntilStart,
+    progressPercent,
+    isPreSemester,
+    isPostSemester,
+    isOngoing,
+    vacationMarkers,
+  };
+}
+
+

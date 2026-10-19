@@ -5,8 +5,6 @@ import {
   User,
   Edit2,
   Trash2,
-  Calendar,
-  Sparkles,
   BookOpen,
   FlaskConical,
   GraduationCap,
@@ -15,7 +13,8 @@ import {
   Plus,
   GripVertical,
   ArrowRightLeft,
-  ChevronDown,
+  Search,
+  Sparkles,
 } from 'lucide-react';
 import { ClassEvent, ClassType, DayOfWeek } from '../domain/types.ts';
 import { DAYS_OF_WEEK } from '../domain/calendarLogic.ts';
@@ -34,6 +33,7 @@ interface TimetableGridProps {
 export const TimetableGrid: React.FC<TimetableGridProps> = ({
   timetableByDay,
   selectedDayFilter,
+  searchQuery = '',
   onEditClass,
   onDeleteClass,
   onAddClassForDay,
@@ -49,6 +49,27 @@ export const TimetableGrid: React.FC<TimetableGridProps> = ({
     selectedDayFilter === 'all'
       ? DAYS_OF_WEEK.filter((d) => d !== 'Sunday' || (timetableByDay[d]?.length || 0) > 0)
       : [selectedDayFilter];
+
+  const trimmedQuery = (searchQuery || '').trim().toLowerCase();
+  const isSearchActive = trimmedQuery.length > 0;
+
+  // Helper to check if a class matches search query
+  const checkClassMatch = (cls: ClassEvent): boolean => {
+    if (!isSearchActive) return false;
+    return (
+      cls.title.toLowerCase().includes(trimmedQuery) ||
+      cls.code.toLowerCase().includes(trimmedQuery) ||
+      cls.room.toLowerCase().includes(trimmedQuery) ||
+      Boolean(cls.professor && cls.professor.toLowerCase().includes(trimmedQuery)) ||
+      Boolean(cls.notes && cls.notes.toLowerCase().includes(trimmedQuery))
+    );
+  };
+
+  // Total matching classes across active days
+  const totalMatchingClasses = activeDays.reduce((acc, day) => {
+    const list = timetableByDay[day] || [];
+    return acc + list.filter(checkClassMatch).length;
+  }, 0);
 
   const getTypeBadge = (type: ClassType) => {
     switch (type) {
@@ -144,6 +165,25 @@ export const TimetableGrid: React.FC<TimetableGridProps> = ({
 
   return (
     <div className="space-y-4">
+      {/* Search Highlighting Active Banner */}
+      {isSearchActive && (
+        <div className="flex items-center justify-between rounded-2xl border border-amber-300 bg-amber-50/90 px-4 py-2.5 text-amber-950 shadow-sm dark:border-amber-700/60 dark:bg-amber-950/40 dark:text-amber-200 animate-in fade-in">
+          <div className="flex items-center gap-2 text-xs font-medium">
+            <Search className="h-4 w-4 text-amber-600 dark:text-amber-400 shrink-0" />
+            <span>
+              Highlighting classes matching{' '}
+              <strong className="underline underline-offset-2">"{searchQuery}"</strong>:
+            </span>
+            <span className="rounded-full bg-amber-200/90 px-2 py-0.5 text-[11px] font-bold text-amber-900 dark:bg-amber-900 dark:text-amber-100">
+              {totalMatchingClasses} class{totalMatchingClasses !== 1 ? 'es' : ''} found
+            </span>
+          </div>
+          <span className="text-[11px] text-amber-700 dark:text-amber-300 hidden sm:inline">
+            Matching text is highlighted in gold
+          </span>
+        </div>
+      )}
+
       {/* View Switcher & Drag-and-drop info notice */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
         <div className="flex items-center gap-2">
@@ -151,18 +191,18 @@ export const TimetableGrid: React.FC<TimetableGridProps> = ({
             Showing schedule for {activeDays.length} day{activeDays.length > 1 ? 's' : ''}
           </p>
           <span className="hidden sm:inline-block text-slate-300 dark:text-slate-700">•</span>
-          <span className="hidden sm:flex items-center gap-1 text-[11px] font-medium text-indigo-600 dark:text-indigo-400 bg-indigo-50 dark:bg-indigo-950/60 px-2 py-0.5 rounded-full">
+          <span className="hidden sm:flex items-center gap-1 text-[11px] font-medium badge-theme-soft px-2.5 py-0.5 rounded-full">
             <GripVertical className="h-3 w-3" />
-            Drag & drop cards across days to reorder
+            Drag & drop cards across days to quickly reorder
           </span>
         </div>
 
-        <div className="flex items-center rounded-lg bg-slate-100 p-0.5 dark:bg-slate-800 text-xs">
+        <div className="flex items-center rounded-xl bg-slate-100 p-0.5 dark:bg-slate-800 text-xs">
           <button
             onClick={() => setViewMode('grid')}
-            className={`rounded-md px-3 py-1 font-medium transition ${
+            className={`rounded-lg px-3 py-1 font-semibold transition ${
               viewMode === 'grid'
-                ? 'bg-white text-indigo-600 shadow-sm dark:bg-slate-700 dark:text-white'
+                ? 'bg-white text-theme shadow-xs dark:bg-slate-700 dark:text-white'
                 : 'text-slate-600 dark:text-slate-400'
             }`}
           >
@@ -170,9 +210,9 @@ export const TimetableGrid: React.FC<TimetableGridProps> = ({
           </button>
           <button
             onClick={() => setViewMode('agenda')}
-            className={`rounded-md px-3 py-1 font-medium transition ${
+            className={`rounded-lg px-3 py-1 font-semibold transition ${
               viewMode === 'agenda'
-                ? 'bg-white text-indigo-600 shadow-sm dark:bg-slate-700 dark:text-white'
+                ? 'bg-white text-theme shadow-xs dark:bg-slate-700 dark:text-white'
                 : 'text-slate-600 dark:text-slate-400'
             }`}
           >
@@ -194,10 +234,10 @@ export const TimetableGrid: React.FC<TimetableGridProps> = ({
                 onDragOver={(e) => handleDragOver(e, day)}
                 onDragLeave={handleDragLeave}
                 onDrop={(e) => handleDrop(e, day)}
-                className={`flex flex-col rounded-2xl border p-3.5 shadow-sm transition-all ${
+                className={`flex flex-col rounded-3xl border p-3.5 shadow-xs transition-all ${
                   isTargetDay
-                    ? 'border-2 border-dashed border-indigo-500 bg-indigo-50/70 dark:border-indigo-400 dark:bg-indigo-950/50 scale-[1.01]'
-                    : 'border-slate-200 bg-white hover:border-slate-300 dark:border-slate-800 dark:bg-slate-900 dark:hover:border-slate-700'
+                    ? 'border-2 border-dashed border-theme-accent bg-theme-light dark:bg-slate-800/80 scale-[1.01]'
+                    : 'border-slate-200/90 bg-white/90 backdrop-blur-xs hover:border-slate-300 dark:border-slate-800 dark:bg-slate-900/90 dark:hover:border-slate-700'
                 }`}
               >
                 {/* Day Header */}
@@ -215,7 +255,7 @@ export const TimetableGrid: React.FC<TimetableGridProps> = ({
 
                   <button
                     onClick={() => onAddClassForDay(day)}
-                    className="flex h-7 w-7 items-center justify-center rounded-lg border border-dashed border-slate-300 text-slate-400 hover:border-indigo-500 hover:bg-indigo-50 hover:text-indigo-600 dark:border-slate-700 dark:hover:bg-indigo-950/40 dark:hover:text-indigo-400 transition"
+                    className="flex h-7 w-7 items-center justify-center rounded-xl border border-dashed border-slate-300 text-slate-400 hover:border-theme-accent hover:text-theme transition dark:border-slate-700"
                     title={`Add class for ${day}`}
                   >
                     <Plus className="h-4 w-4" />
@@ -225,20 +265,20 @@ export const TimetableGrid: React.FC<TimetableGridProps> = ({
                 {/* Day Classes List / Drop Area */}
                 <div className="flex-1 space-y-3 min-h-[140px]">
                   {isTargetDay && (
-                    <div className="flex items-center justify-center rounded-xl border border-dashed border-indigo-400 bg-indigo-100/60 p-3 text-center text-xs font-semibold text-indigo-700 dark:border-indigo-500 dark:bg-indigo-900/60 dark:text-indigo-200 animate-pulse">
+                    <div className="flex items-center justify-center rounded-2xl border-2 border-dashed border-theme-accent badge-theme-soft p-3.5 text-center text-xs font-bold animate-pulse">
                       📥 Drop here to move to {day}
                     </div>
                   )}
 
                   {dayClasses.length === 0 && !isTargetDay ? (
-                    <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-slate-200 py-10 text-center dark:border-slate-800/80">
+                    <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-200 py-10 text-center dark:border-slate-800/80">
                       <Clock className="h-6 w-6 text-slate-300 dark:text-slate-600 mb-1" />
                       <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
                         No classes scheduled
                       </p>
                       <button
                         onClick={() => onAddClassForDay(day)}
-                        className="mt-2 text-[11px] font-semibold text-indigo-600 hover:underline dark:text-indigo-400"
+                        className="mt-2 text-[11px] font-bold text-theme hover:underline"
                       >
                         + Add a class
                       </button>
@@ -248,17 +288,7 @@ export const TimetableGrid: React.FC<TimetableGridProps> = ({
                       const typeBadge = getTypeBadge(cls.type);
                       const TypeIcon = typeBadge.icon;
                       const isDragging = draggedClassId === cls.id;
-                      const isMatch = Boolean(
-                        searchQuery &&
-                          searchQuery.trim().length > 0 &&
-                          (cls.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                            cls.code.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                            cls.room.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                            (cls.professor &&
-                              cls.professor.toLowerCase().includes(searchQuery.toLowerCase())) ||
-                            (cls.notes &&
-                              cls.notes.toLowerCase().includes(searchQuery.toLowerCase())))
-                      );
+                      const isMatch = checkClassMatch(cls);
 
                       return (
                         <div
@@ -266,26 +296,38 @@ export const TimetableGrid: React.FC<TimetableGridProps> = ({
                           draggable
                           onDragStart={(e) => handleDragStart(e, cls.id)}
                           onDragEnd={handleDragEnd}
-                          className={`group relative rounded-xl border p-3 shadow-xs transition cursor-grab active:cursor-grabbing ${
+                          className={`group relative rounded-2xl border p-3 shadow-2xs transition-all cursor-grab active:cursor-grabbing ${
                             isDragging
-                              ? 'opacity-40 scale-95 border-indigo-500 bg-indigo-100/40 dark:bg-indigo-950'
+                              ? 'opacity-40 scale-95 border-theme-accent bg-theme-light'
                               : isMatch
-                              ? 'ring-2 ring-amber-400 border-amber-300 bg-amber-50/50 shadow-md shadow-amber-500/10 dark:ring-amber-400 dark:border-amber-700 dark:bg-amber-950/30'
-                              : 'border-slate-200/90 bg-slate-50/70 hover:border-indigo-300 hover:bg-white hover:shadow-md dark:border-slate-800 dark:bg-slate-800/50 dark:hover:border-indigo-600 dark:hover:bg-slate-800'
+                              ? 'ring-2 ring-amber-400 border-amber-400 bg-amber-50/90 shadow-md shadow-amber-500/20 dark:ring-amber-400 dark:border-amber-600 dark:bg-amber-950/50 scale-[1.01]'
+                              : isSearchActive
+                              ? 'opacity-45 grayscale-[25%] hover:opacity-100 hover:grayscale-0 border-slate-200/90 bg-slate-50/70 dark:border-slate-800 dark:bg-slate-800/40'
+                              : 'border-slate-200/90 bg-slate-50/70 hover:border-theme-accent hover:bg-white hover:shadow-md dark:border-slate-800 dark:bg-slate-800/50 dark:hover:border-theme-accent dark:hover:bg-slate-800'
                           }`}
                         >
                           {/* Accent left border */}
                           <div
-                            className="absolute left-0 top-3 bottom-3 w-1 rounded-r-full"
+                            className="absolute left-0 top-3 bottom-3 w-1.5 rounded-r-full"
                             style={{ backgroundColor: cls.color || '#4f46e5' }}
                           />
+
+                          {/* Match Highlight Pill */}
+                          {isMatch && (
+                            <div className="pl-2 mb-1">
+                              <span className="inline-flex items-center gap-1 rounded-full bg-amber-200/90 px-2 py-0.5 text-[9px] font-extrabold text-amber-950 dark:bg-amber-900 dark:text-amber-100 border border-amber-300 dark:border-amber-700">
+                                <Sparkles className="h-2.5 w-2.5" />
+                                Match
+                              </span>
+                            </div>
+                          )}
 
                           {/* Top Row: Gripper, Time & Recurrence */}
                           <div className="flex items-center justify-between gap-1 pl-2 mb-1.5">
                             <div className="flex items-center gap-1.5 text-xs font-bold text-slate-900 dark:text-slate-100">
                               <span
                                 className="cursor-grab text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
-                                title="Drag to reorder day"
+                                title="Drag across days to reorder"
                               >
                                 <GripVertical className="h-3.5 w-3.5" />
                               </span>
@@ -296,8 +338,8 @@ export const TimetableGrid: React.FC<TimetableGridProps> = ({
 
                           {/* Title & Code with Highlighting */}
                           <div className="pl-2">
-                            <div className="flex items-center gap-1.5 mb-0.5">
-                              <span className="rounded-sm bg-slate-200 px-1.5 py-0.5 text-[10px] font-mono font-bold text-slate-800 dark:bg-slate-700 dark:text-slate-200">
+                            <div className="flex items-center gap-1.5 mb-1">
+                              <span className="rounded-md bg-slate-200 px-1.5 py-0.5 text-[10px] font-mono font-bold text-slate-800 dark:bg-slate-700 dark:text-slate-200">
                                 <HighlightedText text={cls.code} query={searchQuery || ''} />
                               </span>
                               <span
@@ -347,32 +389,31 @@ export const TimetableGrid: React.FC<TimetableGridProps> = ({
                                     moveMenuClassId === cls.id ? null : cls.id
                                   )
                                 }
-                                className="rounded-md bg-white p-1 text-slate-500 shadow-xs hover:bg-slate-100 hover:text-indigo-600 dark:bg-slate-700 dark:text-slate-300"
-                                title="Move to another day"
+                                className="rounded-lg bg-white p-1 text-slate-500 shadow-xs hover:bg-slate-100 hover:text-theme dark:bg-slate-700 dark:text-slate-300"
+                                title="Move to another day (Quick reorder)"
                               >
                                 <ArrowRightLeft className="h-3 w-3" />
                               </button>
 
                               {moveMenuClassId === cls.id && (
-                                <div className="absolute right-0 top-full mt-1 z-30 w-36 rounded-xl border border-slate-200 bg-white py-1.5 shadow-xl dark:border-slate-700 dark:bg-slate-800 animate-in fade-in zoom-in-95">
-                                  <p className="px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">
-                                    Move to Day:
+                                <div className="absolute right-0 top-full mt-1 w-32 rounded-xl border border-slate-200 bg-white p-1.5 shadow-xl dark:border-slate-700 dark:bg-slate-800 z-30">
+                                  <p className="px-2 py-0.5 text-[9px] font-bold uppercase text-slate-400">
+                                    Move to day:
                                   </p>
-                                  {DAYS_OF_WEEK.map((targetD) => (
+                                  {DAYS_OF_WEEK.map((d) => (
                                     <button
-                                      key={targetD}
+                                      key={d}
                                       onClick={() => {
-                                        onMoveClass(cls.id, targetD);
+                                        onMoveClass(cls.id, d);
                                         setMoveMenuClassId(null);
                                       }}
-                                      disabled={targetD === day}
-                                      className={`w-full px-3 py-1 text-left text-xs ${
-                                        targetD === day
-                                          ? 'font-bold text-indigo-600 bg-indigo-50 dark:bg-indigo-950/60 dark:text-indigo-300'
-                                          : 'text-slate-700 hover:bg-slate-100 dark:text-slate-200 dark:hover:bg-slate-700'
+                                      className={`block w-full rounded-lg px-2 py-1 text-left text-xs transition ${
+                                        d === cls.day
+                                          ? 'font-bold text-theme bg-slate-100 dark:bg-slate-700'
+                                          : 'text-slate-700 hover:bg-slate-100 dark:text-slate-300 dark:hover:bg-slate-700'
                                       }`}
                                     >
-                                      {targetD}
+                                      {d}
                                     </button>
                                   ))}
                                 </div>
@@ -381,14 +422,14 @@ export const TimetableGrid: React.FC<TimetableGridProps> = ({
 
                             <button
                               onClick={() => onEditClass(cls)}
-                              className="rounded-md bg-white p-1 text-slate-500 shadow-xs hover:bg-slate-100 hover:text-indigo-600 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600"
+                              className="rounded-lg bg-white p-1 text-slate-500 shadow-xs hover:bg-slate-100 hover:text-theme dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600"
                               title="Edit class"
                             >
                               <Edit2 className="h-3 w-3" />
                             </button>
                             <button
                               onClick={() => onDeleteClass(cls.id)}
-                              className="rounded-md bg-white p-1 text-slate-500 shadow-xs hover:bg-red-50 hover:text-red-600 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600"
+                              className="rounded-lg bg-white p-1 text-slate-500 shadow-xs hover:bg-red-50 hover:text-red-600 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600"
                               title="Delete class"
                             >
                               <Trash2 className="h-3 w-3" />
@@ -413,7 +454,7 @@ export const TimetableGrid: React.FC<TimetableGridProps> = ({
             return (
               <div
                 key={day}
-                className="rounded-2xl border border-slate-200 bg-white p-5 shadow-sm dark:border-slate-800 dark:bg-slate-900"
+                className="rounded-3xl border border-slate-200/90 bg-white/95 p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900/95"
               >
                 <div className="flex items-center justify-between pb-3 mb-3 border-b border-slate-100 dark:border-slate-800">
                   <h3 className="text-base font-bold text-slate-900 dark:text-white">
@@ -428,15 +469,22 @@ export const TimetableGrid: React.FC<TimetableGridProps> = ({
                   {dayClasses.map((cls) => {
                     const typeBadge = getTypeBadge(cls.type);
                     const TypeIcon = typeBadge.icon;
+                    const isMatch = checkClassMatch(cls);
 
                     return (
                       <div
                         key={cls.id}
-                        className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-xl border border-slate-200/80 bg-slate-50 p-4 dark:border-slate-800 dark:bg-slate-800/40"
+                        className={`flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-2xl border p-4 transition-all ${
+                          isMatch
+                            ? 'ring-2 ring-amber-400 border-amber-400 bg-amber-50/90 shadow-md shadow-amber-500/20 dark:ring-amber-400 dark:border-amber-600 dark:bg-amber-950/50'
+                            : isSearchActive
+                            ? 'opacity-45 grayscale-[25%] hover:opacity-100 hover:grayscale-0 border-slate-200/80 bg-slate-50 dark:border-slate-800 dark:bg-slate-800/40'
+                            : 'border-slate-200/80 bg-slate-50 hover:bg-white hover:border-slate-300 dark:border-slate-800 dark:bg-slate-800/40 dark:hover:bg-slate-800'
+                        }`}
                       >
                         <div className="flex items-start gap-3">
                           <div
-                            className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl text-white shadow-xs"
+                            className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl text-white shadow-xs"
                             style={{ backgroundColor: cls.color || '#4f46e5' }}
                           >
                             <TypeIcon className="h-6 w-6" />
@@ -452,6 +500,11 @@ export const TimetableGrid: React.FC<TimetableGridProps> = ({
                                 {typeBadge.label}
                               </span>
                               {getRecurrenceBadge(cls.recurrence)}
+                              {isMatch && (
+                                <span className="rounded-full bg-amber-200/90 px-2 py-0.5 text-[9px] font-extrabold text-amber-950 dark:bg-amber-900 dark:text-amber-100">
+                                  ✨ Match
+                                </span>
+                              )}
                             </div>
                             <h4 className="text-sm font-bold text-slate-900 dark:text-white">
                               <HighlightedText text={cls.title} query={searchQuery || ''} />
@@ -472,14 +525,14 @@ export const TimetableGrid: React.FC<TimetableGridProps> = ({
                         <div className="flex items-center gap-2 self-end sm:self-center">
                           <button
                             onClick={() => onEditClass(cls)}
-                            className="flex items-center gap-1 rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-medium text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-700"
+                            className="flex items-center gap-1 rounded-xl border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-100 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-700"
                           >
                             <Edit2 className="h-3 w-3" />
                             Edit
                           </button>
                           <button
                             onClick={() => onDeleteClass(cls.id)}
-                            className="flex items-center gap-1 rounded-lg border border-red-200 px-3 py-1.5 text-xs font-medium text-red-600 hover:bg-red-50 dark:border-red-900/40 dark:text-red-400 dark:hover:bg-red-950/40"
+                            className="flex items-center gap-1 rounded-xl border border-slate-300 px-3 py-1.5 text-xs font-semibold text-red-600 hover:bg-red-50 dark:border-slate-700 dark:text-red-400 dark:hover:bg-slate-700"
                           >
                             <Trash2 className="h-3 w-3" />
                             Delete

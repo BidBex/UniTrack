@@ -14,7 +14,7 @@ import { CountdownsView } from './components/CountdownsView.tsx';
 import { WidgetView } from './components/WidgetView.tsx';
 import { PostcardsView } from './components/PostcardsView.tsx';
 import { SettingsTab } from './components/SettingsTab.tsx';
-import { DesktopHubModal } from './components/DesktopHubModal.tsx';
+import { AndroidDownloadModal } from './components/AndroidDownloadModal.tsx';
 import { NotificationToasts, OfflineBanner } from './components/NotificationToasts.tsx';
 import { ClassEvent, DayOfWeek } from './domain/types.ts';
 import { getDayOfWeekFromDate } from './domain/calendarLogic.ts';
@@ -22,7 +22,6 @@ import { getDayOfWeekFromDate } from './domain/calendarLogic.ts';
 export default function App() {
   const {
     semester,
-    classes,
     countdowns,
     setCountdowns,
     postcards,
@@ -87,19 +86,40 @@ export default function App() {
     }
   }, [isDarkMode]);
 
-  // Active Tab
+  // Sync chosen theme accent to documentElement and meta theme-color for complete ambiental ambiance
+  useEffect(() => {
+    const accent = theme?.accent || 'indigo';
+    document.documentElement.setAttribute('data-theme-accent', accent);
+
+    const themeColors: Record<string, string> = {
+      indigo: '#4f46e5',
+      blue: '#2563eb',
+      emerald: '#059669',
+      purple: '#7c3aed',
+      rose: '#e11d48',
+      amber: '#d97706',
+      cyan: '#0891b2',
+    };
+
+    const metaTheme = document.querySelector('meta[name="theme-color"]');
+    if (metaTheme) {
+      metaTheme.setAttribute('content', themeColors[accent] || '#4f46e5');
+    }
+  }, [theme?.accent]);
+
+  // Active Tab - Desktop (Qt) removed
   const [activeTab, setActiveTab] = useState<
-    'calendar' | 'countdowns' | 'widget' | 'notes' | 'desktop' | 'settings'
+    'calendar' | 'countdowns' | 'widget' | 'notes' | 'settings'
   >('calendar');
 
   // Modals
   const [isAddClassModalOpen, setIsAddClassModalOpen] = useState(false);
   const [editingClass, setEditingClass] = useState<ClassEvent | null>(null);
   const [defaultDayForAdd, setDefaultDayForAdd] = useState<DayOfWeek>('Monday');
+  const [isAndroidModalOpen, setIsAndroidModalOpen] = useState(false);
 
   // Notifications
   const {
-    permission,
     toasts,
     dismissToast,
     requestNotificationPermission,
@@ -153,8 +173,15 @@ export default function App() {
   const todayClasses = timetableByDay[todayName] || [];
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100 transition-colors flex flex-col font-sans selection:bg-indigo-500 selection:text-white">
-      {/* Top Navbar */}
+    <div
+      data-theme-accent={theme.accent}
+      className="relative min-h-screen text-slate-900 dark:text-slate-100 transition-colors flex flex-col font-sans selection:bg-[var(--theme-primary)] selection:text-white"
+    >
+      {/* Ambiental Atmospheric Glow Layers */}
+      <div className="app-ambient-glow" />
+      <div className="app-ambient-bottom-glow" />
+
+      {/* Top Navbar with Upper Left Logo & Android Button */}
       <Navbar
         currentWeekInfo={currentAcademicWeek}
         activeTab={activeTab}
@@ -167,10 +194,11 @@ export default function App() {
         onUpdateSettings={setSettings}
         onRequestNotificationPermission={requestNotificationPermission}
         onTestNotification={testNotification}
+        onOpenAndroidModal={() => setIsAndroidModalOpen(true)}
       />
 
       {/* Main Content Area */}
-      <main className="flex-1 mx-auto max-w-7xl w-full px-3 py-6 sm:px-6 space-y-6">
+      <main className="relative z-10 flex-1 mx-auto max-w-7xl w-full px-3 py-6 sm:px-6 space-y-6">
         {activeTab === 'calendar' && (
           <div className="space-y-6">
             <TimetableHeader
@@ -190,11 +218,13 @@ export default function App() {
               currentWeekInfo={currentAcademicWeek}
               onOpenAddModal={() => handleOpenAddClass()}
               nextUpcoming={nextUpcoming}
+              currentDate={currentDate}
             />
 
             <TimetableGrid
               timetableByDay={timetableByDay}
               selectedDayFilter={selectedDayFilter}
+              searchQuery={searchQuery}
               onEditClass={handleEditClass}
               onDeleteClass={deleteClass}
               onAddClassForDay={handleOpenAddClass}
@@ -231,10 +261,6 @@ export default function App() {
           />
         )}
 
-        {activeTab === 'desktop' && (
-          <DesktopHubModal onExportJson={exportToJson} />
-        )}
-
         {activeTab === 'settings' && (
           <SettingsTab
             theme={theme}
@@ -252,6 +278,7 @@ export default function App() {
             onExportJson={exportToJson}
             onImportJson={importFromJson}
             onResetToSampleData={resetToSampleData}
+            onOpenAndroidModal={() => setIsAndroidModalOpen(true)}
           />
         )}
       </main>
@@ -263,6 +290,12 @@ export default function App() {
         onSave={handleSaveClass}
         initialClass={editingClass}
         defaultDay={defaultDayForAdd}
+      />
+
+      {/* Android & Mobile Download Modal */}
+      <AndroidDownloadModal
+        isOpen={isAndroidModalOpen}
+        onClose={() => setIsAndroidModalOpen(false)}
       />
 
       {/* Floating Notifications & Toasts */}

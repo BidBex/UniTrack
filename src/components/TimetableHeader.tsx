@@ -1,18 +1,16 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   Calendar,
-  Filter,
   Plus,
   Search,
   RotateCcw,
   Clock,
-  Sparkles,
   ChevronLeft,
   ChevronRight,
-  BookOpen,
-  FlaskConical,
-  Users,
-  Compass,
+  GraduationCap,
+  TrendingUp,
+  Palmtree,
+  CalendarDays,
 } from 'lucide-react';
 import {
   AcademicWeekInfo,
@@ -20,7 +18,10 @@ import {
   DayOfWeek,
   SemesterConfig,
 } from '../domain/types.ts';
-import { DAYS_OF_WEEK } from '../domain/calendarLogic.ts';
+import {
+  DAYS_OF_WEEK,
+  calculateSemesterTimeline,
+} from '../domain/calendarLogic.ts';
 
 interface TimetableHeaderProps {
   semester: SemesterConfig;
@@ -44,6 +45,7 @@ interface TimetableHeaderProps {
     isToday: boolean;
     day: DayOfWeek;
   } | null;
+  currentDate?: Date;
 }
 
 export const TimetableHeader: React.FC<TimetableHeaderProps> = ({
@@ -63,19 +65,26 @@ export const TimetableHeader: React.FC<TimetableHeaderProps> = ({
   currentWeekInfo,
   onOpenAddModal,
   nextUpcoming,
+  currentDate,
 }) => {
   const totalWeeks = semester.totalWeeks || 14;
   const weeksList = Array.from({ length: totalWeeks }, (_, i) => i + 1);
+
+  // Compute visual semester timeline progress
+  const timeline = useMemo(
+    () => calculateSemesterTimeline(semester, currentDate || new Date()),
+    [semester, currentDate]
+  );
 
   return (
     <div className="space-y-4">
       {/* Top Banner: Next Upcoming Class or Vacation Warning */}
       {currentWeekInfo.isVacation ? (
-        <div className="flex items-center justify-between rounded-2xl border border-emerald-200 bg-gradient-to-r from-emerald-50 via-teal-50 to-emerald-50 p-4 text-emerald-950 shadow-sm dark:border-emerald-900/60 dark:from-emerald-950/40 dark:via-teal-950/30 dark:to-emerald-950/40 dark:text-emerald-200">
+        <div className="flex items-center justify-between rounded-3xl border border-emerald-200 bg-gradient-to-r from-emerald-50 via-teal-50 to-emerald-50 p-4 text-emerald-950 shadow-xs dark:border-emerald-900/60 dark:from-emerald-950/40 dark:via-teal-950/30 dark:to-emerald-950/40 dark:text-emerald-200">
           <div className="flex items-center gap-3">
             <span className="text-2xl">🌴</span>
             <div>
-              <h3 className="text-sm font-semibold">
+              <h3 className="text-sm font-bold">
                 {currentWeekInfo.currentVacation?.name || 'Academic Recess'}
               </h3>
               <p className="text-xs text-emerald-700 dark:text-emerald-400">
@@ -88,17 +97,17 @@ export const TimetableHeader: React.FC<TimetableHeaderProps> = ({
           </span>
         </div>
       ) : nextUpcoming ? (
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-2xl border border-indigo-100 bg-gradient-to-r from-indigo-50/90 via-violet-50/50 to-white p-3.5 shadow-sm dark:border-indigo-900/50 dark:from-indigo-950/40 dark:via-purple-950/20 dark:to-slate-900 dark:text-slate-200">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-3xl border border-slate-200/90 bg-white/95 p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900/95">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-indigo-600 text-white shadow-sm">
+            <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl btn-theme-primary text-white shadow-xs">
               <Clock className="h-5 w-5" />
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-xs font-semibold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
+                <span className="text-[11px] font-bold uppercase tracking-wider text-theme">
                   {nextUpcoming.isToday ? 'Next Class Today' : `Next Class (${nextUpcoming.day})`}
                 </span>
-                <span className="rounded-full bg-indigo-100 px-2 py-0.5 text-[10px] font-bold text-indigo-700 dark:bg-indigo-900/60 dark:text-indigo-300">
+                <span className="rounded-full badge-theme-soft px-2 py-0.5 text-[10px] font-bold">
                   starts in {nextUpcoming.startsInMinutes} min
                 </span>
               </div>
@@ -114,7 +123,7 @@ export const TimetableHeader: React.FC<TimetableHeaderProps> = ({
           <div className="flex items-center gap-2 self-end sm:self-center">
             <button
               onClick={onOpenAddModal}
-              className="flex items-center gap-1.5 rounded-xl bg-indigo-600 px-3.5 py-2 text-xs font-medium text-white shadow-sm hover:bg-indigo-700 transition"
+              className="flex items-center gap-1.5 rounded-xl btn-theme-primary px-4 py-2 text-xs font-bold text-white shadow-xs transition hover:scale-105 active:scale-95"
             >
               <Plus className="h-4 w-4" />
               <span>Add Class</span>
@@ -122,9 +131,9 @@ export const TimetableHeader: React.FC<TimetableHeaderProps> = ({
           </div>
         </div>
       ) : (
-        <div className="flex items-center justify-between rounded-2xl border border-slate-200 bg-white p-3.5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        <div className="flex items-center justify-between rounded-3xl border border-slate-200/90 bg-white/95 p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900/95">
           <div>
-            <h4 className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+            <h4 className="text-[11px] font-bold text-slate-500 uppercase tracking-wider">
               Weekly Timetable
             </h4>
             <p className="text-sm font-bold text-slate-900 dark:text-white">
@@ -133,7 +142,7 @@ export const TimetableHeader: React.FC<TimetableHeaderProps> = ({
           </div>
           <button
             onClick={onOpenAddModal}
-            className="flex items-center gap-1.5 rounded-xl bg-indigo-600 px-3.5 py-2 text-xs font-medium text-white shadow-sm hover:bg-indigo-700 transition"
+            className="flex items-center gap-1.5 rounded-xl btn-theme-primary px-4 py-2 text-xs font-bold text-white shadow-xs transition hover:scale-105 active:scale-95"
           >
             <Plus className="h-4 w-4" />
             <span>Add Class</span>
@@ -141,41 +150,149 @@ export const TimetableHeader: React.FC<TimetableHeaderProps> = ({
         </div>
       )}
 
+      {/* Visual Semester Progress Bar Card (Requested Feature) */}
+      <div className="rounded-3xl border border-slate-200/90 bg-white/95 p-4 sm:p-5 shadow-xs dark:border-slate-800 dark:bg-slate-900/95 space-y-3.5">
+        {/* Header row: Title, current status, percentage badge */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+          <div className="flex items-center gap-2.5">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-2xl badge-theme-soft text-theme shadow-2xs">
+              <GraduationCap className="h-5 w-5" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <h3 className="text-xs sm:text-sm font-bold text-slate-900 dark:text-white">
+                  Semester Timeline Progress
+                </h3>
+                <span className="text-[11px] text-slate-400 dark:text-slate-500 hidden sm:inline">
+                  • {semester.name}
+                </span>
+              </div>
+              <p className="text-[11px] text-slate-500 dark:text-slate-400">
+                {timeline.isPreSemester ? (
+                  <span className="text-amber-600 dark:text-amber-400 font-semibold">
+                    Term starts in {timeline.daysUntilStart} days ({timeline.startDateFormatted})
+                  </span>
+                ) : timeline.isPostSemester ? (
+                  <span className="text-emerald-600 dark:text-emerald-400 font-semibold">
+                    Semester completed • All {semester.totalWeeks} academic weeks concluded
+                  </span>
+                ) : (
+                  <span>
+                    Day <strong className="text-slate-800 dark:text-slate-200">{timeline.daysPassed}</strong> of{' '}
+                    {timeline.totalDays} days • <strong className="text-theme">{timeline.daysRemaining} days remaining</strong>
+                  </span>
+                )}
+              </p>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-2 self-start sm:self-center">
+            <span className="rounded-full badge-theme-soft px-3 py-1 text-xs font-extrabold text-theme flex items-center gap-1.5 shadow-2xs">
+              <TrendingUp className="h-3.5 w-3.5" />
+              {timeline.progressPercent}% Complete
+            </span>
+          </div>
+        </div>
+
+        {/* Visual Progress Bar Track with Smooth Theme Gradient and Vacation Markers */}
+        <div className="space-y-1">
+          <div className="relative h-3 sm:h-3.5 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800 p-0.5">
+            {/* Vacation Break Highlight Intervals along track */}
+            {timeline.vacationMarkers.map((vac) => (
+              <div
+                key={vac.id}
+                className="absolute top-0 bottom-0 bg-emerald-400/40 dark:bg-emerald-500/35 border-x border-emerald-500/50 z-10"
+                style={{
+                  left: `${vac.startPercent}%`,
+                  width: `${vac.endPercent - vac.startPercent}%`,
+                }}
+                title={`🌴 ${vac.name}: ${vac.startDateFormatted} to ${vac.endDateFormatted}`}
+              />
+            ))}
+
+            {/* Filled Progress Bar with theme gradient */}
+            <div
+              className="h-full rounded-full btn-theme-primary transition-all duration-700 ease-out shadow-xs relative z-20"
+              style={{ width: `${timeline.progressPercent}%` }}
+            >
+              {/* Animated luminous gloss highlight */}
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent rounded-full animate-pulse" />
+            </div>
+          </div>
+
+          {/* Vacation Markers Labels below track if any */}
+          {timeline.vacationMarkers.length > 0 && (
+            <div className="relative h-4 mt-0.5 pointer-events-none hidden sm:block">
+              {timeline.vacationMarkers.map((vac) => (
+                <div
+                  key={vac.id}
+                  className="absolute -top-0.5 transform -translate-x-1/2 flex items-center gap-0.5 text-[9px] font-bold text-emerald-700 dark:text-emerald-400"
+                  style={{ left: `${(vac.startPercent + vac.endPercent) / 2}%` }}
+                >
+                  <Palmtree className="h-2.5 w-2.5 shrink-0" />
+                  <span>{vac.name}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* Date Labels Footer */}
+        <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400 pt-1.5 border-t border-slate-100 dark:border-slate-800/80 font-medium">
+          <div className="flex items-center gap-1">
+            <span className="font-semibold text-slate-700 dark:text-slate-300">Term Start:</span>
+            <span>{timeline.startDateFormatted}</span>
+          </div>
+
+          <div className="hidden sm:flex items-center gap-1.5 font-bold text-theme">
+            <CalendarDays className="h-3 w-3" />
+            <span>Week {currentWeekInfo.weekNumber} of {currentWeekInfo.totalWeeks}</span>
+            <span className="opacity-40">•</span>
+            <span className="capitalize">{currentWeekInfo.parity} Week</span>
+          </div>
+
+          <div className="flex items-center gap-1">
+            <span className="font-semibold text-slate-700 dark:text-slate-300">Term End:</span>
+            <span>{timeline.endDateFormatted}</span>
+          </div>
+        </div>
+      </div>
+
       {/* Week Selector Ribbon */}
-      <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-slate-100 dark:border-slate-800">
+      <div className="rounded-3xl border border-slate-200/90 bg-white/95 p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900/95">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
           <div className="flex items-center gap-2">
             <h3 className="text-sm font-bold text-slate-900 dark:text-white">
-              Academic Week
+              Academic Week Navigation
             </h3>
-            <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-400">
+            <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-semibold text-slate-600 dark:bg-slate-800 dark:text-slate-400">
               Week {selectedWeek} ({selectedWeekParity.toUpperCase()})
             </span>
             {selectedWeek === currentWeekInfo.weekNumber && (
-              <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-semibold text-emerald-700 dark:bg-emerald-950/70 dark:text-emerald-300">
+              <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-bold text-emerald-700 dark:bg-emerald-950/70 dark:text-emerald-300">
                 Current Week
               </span>
             )}
           </div>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-wrap">
             {selectedWeek !== currentWeekInfo.weekNumber && (
               <button
                 onClick={() => setSelectedWeek(currentWeekInfo.weekNumber)}
-                className="flex items-center gap-1 rounded-lg border border-slate-200 px-2.5 py-1 text-xs font-medium text-indigo-600 hover:bg-indigo-50 dark:border-slate-700 dark:text-indigo-400 dark:hover:bg-slate-800"
+                className="flex items-center gap-1 rounded-xl border border-slate-200 px-2.5 py-1 text-xs font-semibold text-theme hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800 transition"
               >
                 <RotateCcw className="h-3 w-3" />
-                Jump to Current (Week {currentWeekInfo.weekNumber})
+                Jump to Current (W{currentWeekInfo.weekNumber})
               </button>
             )}
 
             {/* Parity Mode Override */}
-            <div className="flex items-center rounded-lg bg-slate-100 p-0.5 dark:bg-slate-800 text-xs">
+            <div className="flex items-center rounded-xl bg-slate-100 p-0.5 dark:bg-slate-800 text-xs">
               <button
                 onClick={() => setParityOverride('auto')}
-                className={`rounded-md px-2.5 py-1 font-medium transition ${
+                className={`rounded-lg px-2.5 py-1 font-semibold transition ${
                   parityOverride === 'auto'
-                    ? 'bg-white text-indigo-600 shadow-sm dark:bg-slate-700 dark:text-white'
+                    ? 'bg-white text-theme shadow-xs dark:bg-slate-700 dark:text-white'
                     : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
                 }`}
                 title="Automatically alternate based on selected week"
@@ -184,9 +301,9 @@ export const TimetableHeader: React.FC<TimetableHeaderProps> = ({
               </button>
               <button
                 onClick={() => setParityOverride('odd')}
-                className={`rounded-md px-2 py-1 font-medium transition ${
+                className={`rounded-lg px-2 py-1 font-semibold transition ${
                   parityOverride === 'odd'
-                    ? 'bg-white text-indigo-600 shadow-sm dark:bg-slate-700 dark:text-white'
+                    ? 'bg-white text-theme shadow-xs dark:bg-slate-700 dark:text-white'
                     : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
                 }`}
               >
@@ -194,9 +311,9 @@ export const TimetableHeader: React.FC<TimetableHeaderProps> = ({
               </button>
               <button
                 onClick={() => setParityOverride('even')}
-                className={`rounded-md px-2 py-1 font-medium transition ${
+                className={`rounded-lg px-2 py-1 font-semibold transition ${
                   parityOverride === 'even'
-                    ? 'bg-white text-indigo-600 shadow-sm dark:bg-slate-700 dark:text-white'
+                    ? 'bg-white text-theme shadow-xs dark:bg-slate-700 dark:text-white'
                     : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
                 }`}
               >
@@ -204,9 +321,9 @@ export const TimetableHeader: React.FC<TimetableHeaderProps> = ({
               </button>
               <button
                 onClick={() => setParityOverride('all')}
-                className={`rounded-md px-2 py-1 font-medium transition ${
+                className={`rounded-lg px-2 py-1 font-semibold transition ${
                   parityOverride === 'all'
-                    ? 'bg-white text-indigo-600 shadow-sm dark:bg-slate-700 dark:text-white'
+                    ? 'bg-white text-theme shadow-xs dark:bg-slate-700 dark:text-white'
                     : 'text-slate-600 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white'
                 }`}
               >
@@ -221,7 +338,7 @@ export const TimetableHeader: React.FC<TimetableHeaderProps> = ({
           <button
             onClick={() => setSelectedWeek(Math.max(1, selectedWeek - 1))}
             disabled={selectedWeek <= 1}
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-100 disabled:opacity-30 dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-800"
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-slate-200 text-slate-500 hover:bg-slate-100 disabled:opacity-30 dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-800"
           >
             <ChevronLeft className="h-4 w-4" />
           </button>
@@ -235,11 +352,11 @@ export const TimetableHeader: React.FC<TimetableHeaderProps> = ({
               <button
                 key={week}
                 onClick={() => setSelectedWeek(week)}
-                className={`group relative flex min-w-[58px] flex-col items-center justify-center rounded-xl py-1.5 px-2 text-xs font-medium transition ${
+                className={`group relative flex min-w-[58px] flex-col items-center justify-center rounded-2xl py-1.5 px-2 text-xs font-semibold transition ${
                   isSelected
-                    ? 'bg-indigo-600 text-white shadow-md shadow-indigo-500/20'
+                    ? 'btn-theme-primary text-white shadow-sm scale-105'
                     : isCurrent
-                    ? 'border-2 border-indigo-400 bg-indigo-50 text-indigo-900 dark:border-indigo-600 dark:bg-indigo-950/40 dark:text-indigo-200'
+                    ? 'border-2 border-theme-accent badge-theme-soft text-theme'
                     : 'border border-slate-200 bg-slate-50 text-slate-700 hover:border-slate-300 hover:bg-slate-100 dark:border-slate-800 dark:bg-slate-800/60 dark:text-slate-300 dark:hover:bg-slate-800'
                 }`}
               >
@@ -260,7 +377,7 @@ export const TimetableHeader: React.FC<TimetableHeaderProps> = ({
           <button
             onClick={() => setSelectedWeek(Math.min(totalWeeks, selectedWeek + 1))}
             disabled={selectedWeek >= totalWeeks}
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-100 disabled:opacity-30 dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-800"
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl border border-slate-200 text-slate-500 hover:bg-slate-100 disabled:opacity-30 dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-800"
           >
             <ChevronRight className="h-4 w-4" />
           </button>
@@ -272,7 +389,7 @@ export const TimetableHeader: React.FC<TimetableHeaderProps> = ({
           <div className="flex items-center gap-1 overflow-x-auto text-xs">
             <button
               onClick={() => setSelectedDayFilter('all')}
-              className={`rounded-lg px-2.5 py-1 font-medium transition ${
+              className={`rounded-xl px-2.5 py-1 font-semibold transition ${
                 selectedDayFilter === 'all'
                   ? 'bg-slate-900 text-white dark:bg-white dark:text-slate-900'
                   : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800'
@@ -284,9 +401,9 @@ export const TimetableHeader: React.FC<TimetableHeaderProps> = ({
               <button
                 key={day}
                 onClick={() => setSelectedDayFilter(day)}
-                className={`rounded-lg px-2.5 py-1 font-medium transition ${
+                className={`rounded-xl px-2.5 py-1 font-semibold transition ${
                   selectedDayFilter === day
-                    ? 'bg-indigo-600 text-white'
+                    ? 'btn-theme-primary text-white shadow-2xs'
                     : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800'
                 }`}
               >
@@ -295,13 +412,13 @@ export const TimetableHeader: React.FC<TimetableHeaderProps> = ({
             ))}
           </div>
 
-          {/* Type Filter */}
-          <div className="flex items-center gap-1.5 text-xs">
+          {/* Type Filter & Search Query */}
+          <div className="flex items-center gap-2 text-xs">
             <span className="text-slate-400 dark:text-slate-500 text-[11px] hidden sm:inline">Type:</span>
             <select
               value={selectedTypeFilter}
               onChange={(e) => setSelectedTypeFilter(e.target.value as ClassType | 'all')}
-              className="rounded-lg border border-slate-200 bg-white px-2.5 py-1 text-xs text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+              className="rounded-xl border border-slate-200 bg-white px-2.5 py-1 text-xs text-slate-700 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
             >
               <option value="all">All Types</option>
               <option value="lecture">Lectures Only</option>
@@ -318,8 +435,16 @@ export const TimetableHeader: React.FC<TimetableHeaderProps> = ({
                 placeholder="Search classes, rooms, profs..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-36 sm:w-56 rounded-lg border border-slate-200 bg-white pl-8 pr-3 py-1 text-xs text-slate-800 placeholder-slate-400 focus:border-indigo-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+                className="w-40 sm:w-60 rounded-xl border border-slate-200 bg-white pl-8 pr-3 py-1 text-xs text-slate-800 placeholder-slate-400 focus:border-theme-accent focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
               />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] font-bold text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
+                >
+                  ✕
+                </button>
+              )}
             </div>
           </div>
         </div>

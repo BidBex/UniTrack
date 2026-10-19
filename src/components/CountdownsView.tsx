@@ -5,11 +5,9 @@ import {
   AlertTriangle,
   CheckCircle2,
   Calendar,
-  Award,
   Search,
   Trash2,
   Edit2,
-  ExternalLink,
   Flame,
   Check,
 } from 'lucide-react';
@@ -99,33 +97,40 @@ export const CountdownsView: React.FC<CountdownsViewProps> = ({
     urgency: 'critical' | 'warning' | 'normal' | 'done',
     isOverdue: boolean
   ) => {
-    if (urgency === 'done') return 'bg-emerald-500';
-    if (isOverdue) return 'bg-red-600';
-    if (urgency === 'critical') return 'bg-gradient-to-r from-amber-500 to-red-500';
-    if (urgency === 'warning') return 'bg-gradient-to-r from-teal-500 to-amber-500';
-    return 'bg-gradient-to-r from-indigo-500 to-violet-500';
+    if (isOverdue) return 'bg-red-500';
+    switch (urgency) {
+      case 'critical':
+        return 'bg-gradient-to-r from-red-500 to-rose-600';
+      case 'warning':
+        return 'bg-gradient-to-r from-amber-500 to-orange-500';
+      case 'done':
+        return 'bg-emerald-500';
+      default:
+        return 'bg-theme';
+    }
   };
 
   return (
     <div className="space-y-6">
-      {/* Top Banner & Summary Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-          <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+      {/* Top Metrics Summary Cards */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="rounded-3xl border border-slate-200/90 bg-white/95 p-4 shadow-xs dark:border-slate-800 dark:bg-slate-900/95">
+          <p className="text-xs font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider flex items-center gap-1">
+            <Calendar className="h-3.5 w-3.5 text-theme" />
             Total Deadlines
           </p>
           <div className="mt-1 flex items-baseline justify-between">
             <span className="text-2xl font-black text-slate-900 dark:text-white">
               {summary.total}
             </span>
-            <span className="text-xs font-medium text-slate-500">
+            <span className="text-xs font-bold text-theme">
               {summary.active} active
             </span>
           </div>
         </div>
 
-        <div className="rounded-2xl border border-red-200 bg-red-50/50 p-4 shadow-sm dark:border-red-900/40 dark:bg-red-950/20">
-          <p className="text-xs font-semibold text-red-600 dark:text-red-400 uppercase tracking-wider flex items-center gap-1">
+        <div className="rounded-3xl border border-red-200 bg-red-50/50 p-4 shadow-xs dark:border-red-900/40 dark:bg-red-950/20">
+          <p className="text-xs font-bold text-red-600 dark:text-red-400 uppercase tracking-wider flex items-center gap-1">
             <Flame className="h-3.5 w-3.5" />
             Urgent (&lt; 24h)
           </p>
@@ -133,14 +138,14 @@ export const CountdownsView: React.FC<CountdownsViewProps> = ({
             <span className="text-2xl font-black text-red-700 dark:text-red-300">
               {summary.critical}
             </span>
-            <span className="text-[11px] text-red-600 dark:text-red-400">
+            <span className="text-[11px] font-semibold text-red-600 dark:text-red-400">
               Needs priority
             </span>
           </div>
         </div>
 
-        <div className="rounded-2xl border border-amber-200 bg-amber-50/50 p-4 shadow-sm dark:border-amber-900/40 dark:bg-amber-950/20">
-          <p className="text-xs font-semibold text-amber-700 dark:text-amber-400 uppercase tracking-wider flex items-center gap-1">
+        <div className="rounded-3xl border border-amber-200 bg-amber-50/50 p-4 shadow-xs dark:border-amber-900/40 dark:bg-amber-950/20">
+          <p className="text-xs font-bold text-amber-700 dark:text-amber-400 uppercase tracking-wider flex items-center gap-1">
             <Clock className="h-3.5 w-3.5" />
             Upcoming (&lt; 3d)
           </p>
@@ -148,14 +153,14 @@ export const CountdownsView: React.FC<CountdownsViewProps> = ({
             <span className="text-2xl font-black text-amber-800 dark:text-amber-300">
               {summary.warning}
             </span>
-            <span className="text-[11px] text-amber-700 dark:text-amber-400">
+            <span className="text-[11px] font-semibold text-amber-700 dark:text-amber-400">
               This week
             </span>
           </div>
         </div>
 
-        <div className="rounded-2xl border border-emerald-200 bg-emerald-50/50 p-4 shadow-sm dark:border-emerald-900/40 dark:bg-emerald-950/20">
-          <p className="text-xs font-semibold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider flex items-center gap-1">
+        <div className="rounded-3xl border border-emerald-200 bg-emerald-50/50 p-4 shadow-xs dark:border-emerald-900/40 dark:bg-emerald-950/20">
+          <p className="text-xs font-bold text-emerald-700 dark:text-emerald-400 uppercase tracking-wider flex items-center gap-1">
             <CheckCircle2 className="h-3.5 w-3.5" />
             Completed
           </p>
@@ -163,7 +168,7 @@ export const CountdownsView: React.FC<CountdownsViewProps> = ({
             <span className="text-2xl font-black text-emerald-800 dark:text-emerald-300">
               {summary.completed}
             </span>
-            <span className="text-[11px] text-emerald-700 dark:text-emerald-400">
+            <span className="text-[11px] font-semibold text-emerald-700 dark:text-emerald-400">
               Submitted
             </span>
           </div>
@@ -171,7 +176,7 @@ export const CountdownsView: React.FC<CountdownsViewProps> = ({
       </div>
 
       {/* Filter and Action Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-2xl border border-slate-200 bg-white p-3.5 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 rounded-3xl border border-slate-200/90 bg-white/95 p-3.5 shadow-xs dark:border-slate-800 dark:bg-slate-900/95">
         {/* Category Pills */}
         <div className="flex items-center gap-1 overflow-x-auto text-xs">
           {(
@@ -186,9 +191,9 @@ export const CountdownsView: React.FC<CountdownsViewProps> = ({
             <button
               key={val}
               onClick={() => setCategoryFilter(val)}
-              className={`rounded-lg px-3 py-1.5 font-medium transition ${
+              className={`rounded-xl px-3 py-1.5 font-semibold transition ${
                 categoryFilter === val
-                  ? 'bg-indigo-600 text-white shadow-sm'
+                  ? 'btn-theme-primary text-white shadow-xs'
                   : 'text-slate-600 hover:bg-slate-100 dark:text-slate-400 dark:hover:bg-slate-800'
               }`}
             >
@@ -206,13 +211,13 @@ export const CountdownsView: React.FC<CountdownsViewProps> = ({
               placeholder="Search countdowns..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-40 sm:w-52 rounded-xl border border-slate-200 bg-slate-50 pl-8 pr-3 py-1.5 text-xs text-slate-800 placeholder-slate-400 focus:border-indigo-500 focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
+              className="w-40 sm:w-56 rounded-xl border border-slate-200 bg-slate-50 pl-8 pr-3 py-1.5 text-xs text-slate-800 placeholder-slate-400 focus:border-theme-accent focus:bg-white focus:outline-none dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200"
             />
           </div>
 
           <button
             onClick={handleOpenAdd}
-            className="flex items-center gap-1.5 rounded-xl bg-indigo-600 px-4 py-2 text-xs font-semibold text-white shadow-sm hover:bg-indigo-700 transition"
+            className="flex items-center gap-1.5 rounded-xl btn-theme-primary px-4 py-2 text-xs font-bold text-white shadow-xs transition hover:scale-105 active:scale-95 shrink-0"
           >
             <Plus className="h-4 w-4" />
             <span>Add Countdown</span>
@@ -220,10 +225,10 @@ export const CountdownsView: React.FC<CountdownsViewProps> = ({
         </div>
       </div>
 
-      {/* Countdowns Cards List */}
+      {/* Countdowns Cards List with Visual Progress Bars */}
       <div className="space-y-4">
         {filteredItems.length === 0 ? (
-          <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-slate-300 py-16 text-center dark:border-slate-800">
+          <div className="flex flex-col items-center justify-center rounded-3xl border border-dashed border-slate-300 py-16 text-center dark:border-slate-800">
             <Clock className="h-10 w-10 text-slate-300 dark:text-slate-600 mb-2" />
             <h4 className="text-sm font-bold text-slate-800 dark:text-slate-200">
               No countdowns match your filter
@@ -233,7 +238,7 @@ export const CountdownsView: React.FC<CountdownsViewProps> = ({
             </p>
             <button
               onClick={handleOpenAdd}
-              className="mt-4 rounded-xl bg-indigo-600 px-4 py-2 text-xs font-medium text-white shadow-sm hover:bg-indigo-700"
+              className="mt-4 rounded-xl btn-theme-primary px-4 py-2 text-xs font-bold text-white shadow-xs"
             >
               + Create First Countdown
             </button>
@@ -251,7 +256,7 @@ export const CountdownsView: React.FC<CountdownsViewProps> = ({
             return (
               <div
                 key={item.id}
-                className={`group rounded-2xl border bg-white p-5 shadow-sm transition hover:shadow-md dark:bg-slate-900 ${
+                className={`group rounded-3xl border bg-white/95 p-5 shadow-xs transition-all hover:shadow-md dark:bg-slate-900/95 ${
                   progress.isOverdue
                     ? 'border-red-300 dark:border-red-900/60'
                     : progress.urgency === 'critical'
@@ -266,10 +271,10 @@ export const CountdownsView: React.FC<CountdownsViewProps> = ({
                   <div className="flex items-center gap-3">
                     <button
                       onClick={() => toggleCompleted(item.id)}
-                      className={`flex h-6 w-6 items-center justify-center rounded-lg border transition ${
+                      className={`flex h-6 w-6 items-center justify-center rounded-xl border transition ${
                         item.completed
                           ? 'border-emerald-500 bg-emerald-500 text-white'
-                          : 'border-slate-300 hover:border-indigo-500 dark:border-slate-700'
+                          : 'border-slate-300 hover:border-theme-accent dark:border-slate-700'
                       }`}
                       title={item.completed ? 'Mark incomplete' : 'Mark completed'}
                     >
@@ -279,7 +284,7 @@ export const CountdownsView: React.FC<CountdownsViewProps> = ({
                     <div>
                       <div className="flex flex-wrap items-center gap-2 mb-1">
                         {item.courseCode && (
-                          <span className="font-mono text-xs font-bold text-indigo-600 dark:text-indigo-400">
+                          <span className="font-mono text-xs font-bold text-theme">
                             [{item.courseCode}]
                           </span>
                         )}
@@ -287,7 +292,7 @@ export const CountdownsView: React.FC<CountdownsViewProps> = ({
                           {item.category}
                         </span>
                         {item.weightPercent && (
-                          <span className="rounded-full bg-indigo-50 px-2 py-0.5 text-[10px] font-bold text-indigo-700 dark:bg-indigo-950/60 dark:text-indigo-300">
+                          <span className="rounded-full badge-theme-soft px-2 py-0.5 text-[10px] font-bold">
                             {item.weightPercent}% of grade
                           </span>
                         )}
@@ -308,14 +313,14 @@ export const CountdownsView: React.FC<CountdownsViewProps> = ({
                   <div className="flex items-center gap-2 self-end sm:self-center">
                     <button
                       onClick={() => handleEdit(item)}
-                      className="rounded-lg border border-slate-200 p-1.5 text-slate-500 hover:bg-slate-100 hover:text-indigo-600 dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-800"
+                      className="rounded-xl border border-slate-200 p-1.5 text-slate-500 hover:bg-slate-100 hover:text-theme dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-800"
                       title="Edit countdown"
                     >
                       <Edit2 className="h-3.5 w-3.5" />
                     </button>
                     <button
                       onClick={() => deleteCountdown(item.id)}
-                      className="rounded-lg border border-slate-200 p-1.5 text-slate-500 hover:bg-red-50 hover:text-red-600 dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-800"
+                      className="rounded-xl border border-slate-200 p-1.5 text-slate-500 hover:bg-red-50 hover:text-red-600 dark:border-slate-700 dark:text-slate-400 dark:hover:bg-slate-800"
                       title="Delete countdown"
                     >
                       <Trash2 className="h-3.5 w-3.5" />
@@ -323,7 +328,7 @@ export const CountdownsView: React.FC<CountdownsViewProps> = ({
                   </div>
                 </div>
 
-                {/* Progress Bar Section (Visual Progress Bar requested by user!) */}
+                {/* Progress Bar Section (Visual Progress Bar) */}
                 <div className="space-y-1.5">
                   <div className="flex items-center justify-between text-xs font-semibold">
                     <span className="text-slate-500 dark:text-slate-400 flex items-center gap-1.5">
@@ -333,22 +338,24 @@ export const CountdownsView: React.FC<CountdownsViewProps> = ({
 
                     {/* Live Dynamic Countdown Display */}
                     <span
-                      className={`font-mono text-sm font-bold ${
+                      className={`font-mono text-sm font-extrabold ${
                         progress.isOverdue
                           ? 'text-red-600 dark:text-red-400'
                           : progress.urgency === 'critical'
                           ? 'text-red-600 dark:text-red-400'
                           : progress.urgency === 'warning'
                           ? 'text-amber-600 dark:text-amber-400'
-                          : 'text-indigo-600 dark:text-indigo-400'
+                          : progress.isCompleted
+                          ? 'text-emerald-600 dark:text-emerald-400'
+                          : 'text-theme'
                       }`}
                     >
-                      ⏳ {progress.humanFormatted}
+                      {progress.humanFormatted}
                     </span>
                   </div>
 
-                  {/* Visual Bar */}
-                  <div className="h-3 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800 p-0.5">
+                  {/* Visual Progress Bar Track */}
+                  <div className="relative h-3 w-full overflow-hidden rounded-full bg-slate-100 dark:bg-slate-800">
                     <div
                       className={`h-full rounded-full transition-all duration-500 ${getProgressBarColor(
                         progress.urgency,
@@ -358,24 +365,21 @@ export const CountdownsView: React.FC<CountdownsViewProps> = ({
                     />
                   </div>
 
-                  <div className="flex items-center justify-between text-[11px] text-slate-400 dark:text-slate-500">
-                    <span>Announced / Start</span>
-                    <span>{progress.progressPercent}% elapsed</span>
-                    <span>Deadline</span>
+                  <div className="flex items-center justify-between text-[11px] text-slate-500 dark:text-slate-400">
+                    <span>Elapsed: {Math.round(progress.progressPercent)}%</span>
+                    <span>
+                      {progress.isOverdue
+                        ? 'Overdue'
+                        : `${progress.daysRemaining}d ${progress.hoursRemaining}h remaining`}
+                    </span>
                   </div>
                 </div>
 
-                {/* Additional Details: Location, Links, Notes */}
-                {(item.locationOrLink || item.notes) && (
-                  <div className="mt-3 flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 pt-2.5 text-xs text-slate-600 dark:border-slate-800 dark:text-slate-400">
-                    {item.locationOrLink && (
-                      <span className="flex items-center gap-1.5 truncate max-w-md">
-                        <ExternalLink className="h-3 w-3 shrink-0 text-slate-400" />
-                        <span>{item.locationOrLink}</span>
-                      </span>
-                    )}
-                    {item.notes && <span className="italic">Note: {item.notes}</span>}
-                  </div>
+                {/* Notes if provided */}
+                {item.notes && (
+                  <p className="mt-3 text-xs italic text-slate-500 dark:text-slate-400 border-t border-slate-100 pt-2 dark:border-slate-800">
+                    "{item.notes}"
+                  </p>
                 )}
               </div>
             );
@@ -383,6 +387,7 @@ export const CountdownsView: React.FC<CountdownsViewProps> = ({
         )}
       </div>
 
+      {/* Modal */}
       <AddEditCountdownModal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
